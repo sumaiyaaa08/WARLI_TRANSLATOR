@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "name": "Warli grammar rules (seed)",
+    "description": "Rule-based grammar layer applied after dictionary lookup: word-order reordering, simple inflection/affixation, and postposition mapping. Derived from the lipi/pronunciation research papers (data/research_papers/). Editable without touching Python.",
+    "status": "SEED. Refine against the two Warli research papers once added.",
+    "schema_version": "1.0"
+  },
+  "word_order": {
+    "_comment": "Warli, like Marathi/Hindi, is predominantly SOV (subject-object-verb). The reoderer moves a trailing verb to the end and keeps the subject first.",
+    "target": "SOV",
+    "source_defaults": { "en": "SVO", "hi": "SOV" }
+  },
+  "inflections": {
+    "_comment": "Simple suffixes keyed by a coarse grammatical feature. Applied to the Warli verb/noun token when the matching source cue is detected.",
+    "plural_suffix": "आनी",
+    "present_continuous_suffix": "ता",
+    "past_suffix": "ला",
+    "imperative": "keep_stem"
+  },
+  "postpositions": {
+    "_comment": "English/Hindi relational words mapped to Warli postpositions (Warli uses postpositions, not prepositions).",
+    "en": { "in": "मादे", "on": "वयर", "to": "कडे", "with": "वांगडा", "for": "खातीर", "from": "सावन" },
+    "hi": { "में": "मादे", "पर": "वयर", "को": "कडे", "से": "सावन", "लिए": "खातीर", "के साथ": "वांगडा" }
+  },
+  "cue_rules": [
+    { "_comment": "'am/is/are + verb' -> present continuous suffix", "match_any_en": ["am", "is", "are"], "match_any_hi": ["हूँ", "है", "हैं"], "apply": "present_continuous_suffix", "to_pos": "verb" },
+    { "_comment": "'was/were/did' -> past suffix", "match_any_en": ["was", "were", "did"], "match_any_hi": ["था", "थी", "थे"], "apply": "past_suffix", "to_pos": "verb" }
+  ]
+}

@@ -1,0 +1,65 @@
+# Render Blueprint — Warli Speech Translator backend (FastAPI).
+# Deploy: Render dashboard -> "New +" -> "Blueprint" -> point at this repo.
+# Render reads this file, creates the web service, and applies the settings below.
+#
+# NOTE ON DATA: the whole repo is deployed (no rootDir restriction), so the
+# backend can read the sibling `data/` folder. config.py resolves data_dir from
+# its own file location (backend/../data), which stays correct regardless of the
+# process working directory — so we intentionally do NOT set WARLI_DATA_DIR here.
+
+services:
+  - type: web
+    name: warli-backend
+    runtime: python
+    plan: free                 # upgrade for persistent disk (avoids Whisper re-download on cold start)
+    region: oregon
+    # Install deps from the backend subfolder, then run uvicorn from there so
+    # `app.main:app` imports cleanly.
+    buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Pin a Python that has prebuilt wheels for pydantic-core / faster-whisper.
+      # (3.14 is too new for some native wheels — see README "Known limitations".)
+      - key: PYTHON_VERSION
+        value: 3.12.3
+
+      # ASR (Whisper). Render FREE tier = 512 MB RAM, so use 'tiny' (the 'small'
+      # model will OOM there). Upgrade the instance to use 'base'/'small' for
+      # better accuracy. Set WARLI_ASR_ENABLED=false to run text+TTS only (no
+      # model download, no RAM pressure) — typed text still exercises both modes.
+      - key: WARLI_ASR_ENABLED
+        value: "true"
+      - key: WARLI_ASR_MODEL
+        value: tiny
+      - key: WARLI_ASR_DEVICE
+        value: cpu
+      - key: WARLI_ASR_COMPUTE
+        value: int8
+
+      # Translation engine (rule-based for now).
+      - key: WARLI_TRANSLATION_ENGINE
+        value: rule
+
+      # TTS — APPROXIMATION (Hindi/Marathi voice reading Warli Devanagari).
+      # gTTS needs outbound internet; Render provides it.
+      - key: WARLI_TTS_ENABLED
+        value: "true"
+      - key: WARLI_TTS_LANG
+        value: hi
+
+      # Optional pronunciation layer (decoupled).
+      - key: WARLI_PRONUNCIATION_ENABLED
+        value: "true"
+
+      # IMPORTANT: set this to your Vercel frontend origin(s), comma-separated,
+      # e.g. https://warli-translator.vercel.app  — required for browser CORS.
+      # sync:false means Render will prompt you to enter the real value.
+      - key: WARLI_CORS_ORIGINS
+        sync: false
+
+      # Cache the Whisper model on Render's disk so it isn't re-fetched within a
+      # running instance. (On the free plan the disk is wiped on spin-down.)
+      - key: HF_HOME
+        value: /opt/render/project/src/.cache/huggingface

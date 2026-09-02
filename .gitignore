@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.local
+
+# Environment
+.env
+.env.local
+
+# Vercel / deploy helpers (local only)
+.vercel/
+.vercel-tmp/
+frontend/.vercel/
+
+# IDE-generated metadata / knowledge base
+.qoder/
+
+# Whisper / model caches
+.cache/
+*.bin
+*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data: keep structure + seed, ignore large user-supplied media
+data/**/clips/*
+!data/**/clips/.gitkeep
+data/research_papers/*.pdf
+data/voice_recording/*.wav
+data/voice_recording/*.mp3
+data/voice_recording/*.m4a
+data/pronunciation_audio/*.wav
+data/pronunciation_audio/*.mp3

@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "name": "Warli spelling correction / normalization table (seed)",
+    "description": "wrong -> correct Warli spelling pairs. In the real project these come from the annotated audio recording (voice_recording.*) where incorrect Warli spellings are marked alongside the correct one. This table is applied AFTER dictionary lookup to auto-fix common mis-transliterations. It is a correction/validation dataset, NOT ASR training data.",
+    "status": "SEED. Replace/extend `pairs` with the annotations transcribed from voice_recording.*.",
+    "schema_version": "1.0",
+    "pair_fields": {
+      "wrong": "Incorrectly spelled/transliterated Warli token (as it may slip through lookup or manual entry).",
+      "correct": "Canonical Warli spelling in Devanagari.",
+      "source": "Where the correction came from, e.g. 'voice_recording:03:12' (timestamp) or 'manuscript'."
+    }
+  },
+  "pairs": [
+    { "wrong": "पानी",    "correct": "पाणी",    "source": "voice_recording:00:14", "note": "Hindi-influenced short 'a'; Warli uses 'णी'." },
+    { "wrong": "पाणीी",   "correct": "पाणी",    "source": "voice_recording:00:41", "note": "Duplicated matra." },
+    { "wrong": "घरा",     "correct": "घर",      "source": "voice_recording:01:02", "note": "Spurious Hindi oblique ending dropped." },
+    { "wrong": "नांव",    "correct": "नाव",     "source": "voice_recording:01:30", "note": "Marathi nasalization normalized to Warli form." },
+    { "wrong": "येणे",    "correct": "ये",      "source": "voice_recording:02:05", "note": "Infinitive reduced to Warli stem." },
+    { "wrong": "आनी",     "correct": "आणि",     "source": "voice_recording:02:48", "note": "'and' — final long-i corrected to short." },
+    { "wrong": "बरें",    "correct": "बरं",     "source": "voice_recording:03:12", "note": "Anusvara vs chandrabindu normalization." },
+    { "wrong": "देव्ह",   "correct": "देव",     "source": "voice_recording:03:40", "note": "Trailing conjunct artifact removed." }
+  ]
+}

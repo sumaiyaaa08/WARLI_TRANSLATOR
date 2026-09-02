@@ -1,0 +1,27 @@
+# Warli Speech Translator — backend dependencies
+# Install:  pip install -r requirements.txt
+#
+# Python: 3.11+ recommended. Versions below are minimums (>=) rather than hard
+# pins so pip can select builds with wheels for your interpreter. On very new
+# Python releases (e.g. 3.14), heavily-pinned native wheels like pydantic-core
+# may not exist yet and will try to compile from source — using >= avoids that.
+
+# --- Web framework ---
+fastapi>=0.115
+uvicorn[standard]>=0.34
+python-multipart>=0.0.20
+pydantic>=2.10
+
+# --- TTS (Warli speech output; APPROXIMATION via Hindi/Marathi voice) ---
+# gTTS calls Google's endpoint, so it needs internet access at runtime.
+gTTS>=2.5
+
+# --- ASR (English/Hindi speech -> text) ---
+# faster-whisper is CPU friendly and avoids a heavy torch install. The model
+# downloads on first use. Set WARLI_ASR_ENABLED=false to skip entirely.
+# If faster-whisper has no wheel for your Python yet, install it separately or
+# disable ASR and use /translate/text.
+faster-whisper>=1.1
+
+# --- Utilities ---
+python-dotenv>=1.0

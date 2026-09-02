@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "name": "Warli pronunciation lexicon (OPTIONAL module - seed)",
+    "description": "word -> phonetic respelling used to NUDGE a Hindi/Marathi TTS voice toward more authentic Warli pronunciation before synthesis. Derived from the lipi/pronunciation research papers + transcribed YouTube/field audio. This module is fully DECOUPLED: if this file is empty or missing, TTS reads the Devanagari text unchanged. Accuracy scales with how much transcribed Warli audio the team collects.",
+    "status": "SEED / OPTIONAL. Extend `lexicon` as more audio is transcribed.",
+    "schema_version": "1.0",
+    "entry_fields": {
+      "warli": "Warli token in Devanagari (the key).",
+      "respell": "Devanagari respelling fed to the TTS voice to approximate true Warli sounds.",
+      "ipa": "Optional IPA-like notation for documentation/future fine-tuning.",
+      "source": "Where the pronunciation was heard, e.g. 'youtube:<id>@00:23' or 'field:palghar'. Credit sources in sources.md."
+    }
+  },
+  "lexicon": [
+    { "warli": "पाणी",  "respell": "पावऽणी",  "ipa": "paːʋəɳiː",  "source": "research_paper:pronunciation p.4" },
+    { "warli": "मादे",  "respell": "मादऽ",    "ipa": "maːdə",     "source": "research_paper:pronunciation p.6" },
+    { "warli": "वयर",   "respell": "वऽयार",   "ipa": "ʋəjaːr",    "source": "research_paper:lipi p.3" }
+  ]
+}
