@@ -1,261 +1,480 @@
 /* Warli Speech Translator — global styles.
-   Warli art is monochrome (white on earthy red/brown). The palette below nods to
-   that while keeping strong contrast for accessibility. */
+   Clean, flex-based layout with a single unified composer (type OR speak in one
+   box, Google-Translate / Claude style). Warli art is monochrome on earthy red,
+   so the accent is a terracotta. Light by default, dark via prefers-color-scheme. */
 
 :root {
-  --bg: #1a1210;
-  --surface: #241a17;
-  --surface-2: #2e221e;
-  --border: #3d2c26;
-  --text: #f5ede6;
-  --text-muted: #c2aea3;
-  --accent: #e8734a;       /* Warli terracotta */
-  --accent-strong: #ff8a5c;
-  --success: #7bb661;
-  --danger: #e5484d;
-  --radius: 12px;
-  --focus: 0 0 0 3px rgba(232, 115, 74, 0.5);
+  /* Light theme (default) */
+  --bg: #f6f3f0;
+  --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(217, 96, 59, 0.08), transparent 60%);
+  --surface: #ffffff;
+  --surface-2: #f2ece7;
+  --surface-3: #e9e1da;
+  --border: #e6ddd5;
+  --border-strong: #d6c9bf;
+  --text: #2a1f1a;
+  --text-muted: #85716a;
+  --accent: #d9603b;          /* Warli terracotta */
+  --accent-strong: #c14f2d;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(217, 96, 59, 0.10);
+  --success: #3f7d3a;
+  --success-soft: rgba(63, 125, 58, 0.12);
+  --danger: #d33a3f;
+  --danger-soft: rgba(211, 58, 63, 0.10);
+  --shadow-sm: 0 1px 2px rgba(42, 31, 26, 0.05);
+  --shadow-md: 0 6px 24px rgba(42, 31, 26, 0.08), 0 1px 3px rgba(42, 31, 26, 0.06);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
+  --focus: 0 0 0 3px var(--accent-soft);
+
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Devanagari', sans-serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16110f;
+    --bg-accent: radial-gradient(1200px 600px at 50% -10%, rgba(232, 115, 74, 0.12), transparent 60%);
+    --surface: #1f1815;
+    --surface-2: #2a211d;
+    --surface-3: #332823;
+    --border: #382b25;
+    --border-strong: #4a3a32;
+    --text: #f4ece5;
+    --text-muted: #b3a096;
+    --accent: #e8734a;
+    --accent-strong: #ff8a5c;
+    --accent-contrast: #1a1210;
+    --accent-soft: rgba(232, 115, 74, 0.16);
+    --success: #7bb661;
+    --success-soft: rgba(123, 182, 97, 0.16);
+    --danger: #ff6b6f;
+    --danger-soft: rgba(255, 107, 111, 0.14);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
 }
 
 * { box-sizing: border-box; }
 
-html, body, #root { height: 100%; }
+html, body, #root { min-height: 100%; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: var(--bg-accent);
+  background-repeat: no-repeat;
   color: var(--text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; cursor: pointer; color: inherit; }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: var(--radius-sm);
 }
 
 /* Devanagari output gets a font stack that renders it cleanly. */
 .devanagari {
   font-family: 'Noto Sans Devanagari', 'Mangal', system-ui, sans-serif;
-  line-height: 1.7;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-}
-
-:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
-  border-radius: 8px;
-}
-
-.app {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 24px 16px 64px;
-}
-
-.app-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.app-header h1 {
-  margin: 0 0 6px;
-  font-size: clamp(1.5rem, 4vw, 2.1rem);
-  letter-spacing: 0.3px;
-}
-
-.app-header p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 18px;
-}
-
-.panel-title {
-  margin: 0 0 14px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--text-muted);
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.control-group { flex: 1 1 200px; }
-
-.control-group > .label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-/* Segmented toggle */
-.segmented {
-  display: inline-flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 3px;
-  gap: 3px;
-}
-
-.segmented button {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-weight: 600;
-  transition: background 0.15s, color 0.15s;
-}
-
-.segmented button[aria-pressed='true'] {
-  background: var(--accent);
-  color: #1a1210;
-}
-
-.recorder {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.mic-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--accent);
-  color: #1a1210;
-  border: none;
-  padding: 14px 22px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 1rem;
-  transition: transform 0.1s, background 0.15s;
-}
-
-.mic-btn:hover:not(:disabled) { background: var(--accent-strong); }
-.mic-btn:active:not(:disabled) { transform: scale(0.97); }
-.mic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.mic-btn.recording { background: var(--danger); color: #fff; }
-
-.mic-dot {
-  width: 12px; height: 12px; border-radius: 50%;
-  background: currentColor;
-}
-.mic-btn.recording .mic-dot { animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-.status-text { color: var(--text-muted); font-size: 0.9rem; }
-
-.upload-row {
-  display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap;
-}
-
-.file-label {
-  border: 1px dashed var(--border);
-  background: var(--surface-2);
-  color: var(--text-muted);
-  padding: 10px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-.file-label:hover { border-color: var(--accent); color: var(--text); }
-.file-label input { display: none; }
-
-.text-input {
-  width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 12px 14px;
-  font: inherit;
-  resize: vertical;
-  min-height: 70px;
-}
-
-.primary-btn {
-  background: var(--accent);
-  color: #1a1210;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-.primary-btn:hover:not(:disabled) { background: var(--accent-strong); }
-.primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.result-block { margin-bottom: 16px; }
-.result-block .result-label {
-  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--text-muted); margin-bottom: 6px;
-}
-.result-source { font-size: 1.05rem; color: var(--text-muted); }
-.result-warli {
-  font-size: clamp(1.4rem, 5vw, 2rem);
-  font-weight: 600;
-  color: var(--text);
-  word-break: break-word;
-}
-.result-roman { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
-
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.chip {
-  font-size: 0.78rem; padding: 4px 10px; border-radius: 999px;
-  border: 1px solid var(--border); color: var(--text-muted); background: var(--surface-2);
-}
-.chip.unmatched { border-color: var(--danger); color: #ffb4b6; }
-.chip.corrected { border-color: var(--success); color: #b7e0a3; }
-
-.audio-row { margin-top: 14px; }
-audio { width: 100%; margin-top: 8px; }
-
-.notice {
-  border-left: 3px solid var(--accent);
-  background: var(--surface-2);
-  color: var(--text-muted);
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-top: 12px;
-}
-
-.error {
-  border-left: 3px solid var(--danger);
-  background: rgba(229, 72, 77, 0.1);
-  color: #ffb4b6;
-  padding: 12px 14px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.spinner {
-  display: inline-block; width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-  border-radius: 50%; animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.footer-note {
-  text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 24px;
+  line-height: 1.75;
 }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ------------------------------------------------------------------ shell */
+.app {
+  position: relative;
+  z-index: 1;              /* sit above the fixed Warli wall-painting backdrop */
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 20px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.app-header h1 .brand-dot { color: var(--accent); }
+
+.app-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  max-width: 46ch;
+}
+
+/* Slim backend status line under the header. */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--danger); flex: none;
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+.status-dot.online { background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
+.status-bar .sep { opacity: 0.5; }
+
+/* ------------------------------------------------------------------ cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+/* ------------------------------------------------------- unified composer */
+.composer {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.18s, border-color 0.18s;
+}
+.composer:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md), var(--focus);
+}
+
+.composer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.composer-bar .bar-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bar-caption {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.composer-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 20px 18px;
+  font: inherit;
+  font-size: 1.12rem;
+  line-height: 1.6;
+  resize: none;
+  min-height: 128px;
+}
+.composer-input::placeholder { color: var(--text-muted); opacity: 0.75; }
+.composer-input:focus { outline: none; }
+.composer-input:disabled { opacity: 0.6; }
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px 12px 14px;
+  border-top: 1px solid var(--border);
+}
+.composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.tool-status {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin-left: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Round ghost icon buttons (mic / upload / play). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px; height: 42px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.08s;
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.icon-btn:active:not(:disabled) { transform: scale(0.94); }
+.icon-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* Recording state — mic turns red and pulses. */
+.icon-btn.recording {
+  background: var(--danger);
+  color: #fff;
+  border-color: transparent;
+  animation: rec-pulse 1.4s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--danger-soft); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.file-input { display: none; }
+
+/* Primary send / translate button. */
+.send-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  padding: 11px 20px;
+  border-radius: var(--radius-pill);
+  font-weight: 650;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.15s, transform 0.08s, opacity 0.15s;
+  flex: none;
+}
+.send-btn:hover:not(:disabled) { background: var(--accent-strong); }
+.send-btn:active:not(:disabled) { transform: scale(0.97); }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.send-btn svg { width: 18px; height: 18px; }
+
+/* Segmented toggle (language / output mode). */
+.segmented {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  gap: 2px;
+}
+.segmented button {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.86rem;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.segmented button:hover:not([aria-pressed='true']) { color: var(--text); }
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* ------------------------------------------------------------- result card */
+.result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+.result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.result-lang {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.result-source {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+.result-source .src-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.result-source .src-text { font-size: 1rem; color: var(--text-muted); }
+
+.result-warli {
+  font-size: clamp(1.6rem, 5.5vw, 2.3rem);
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+.result-roman { color: var(--text-muted); font-size: 0.95rem; margin-top: 2px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-size: 0.78rem;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface-2);
+}
+.chip.unmatched { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+.chip.corrected { border-color: var(--success); color: var(--success); background: var(--success-soft); }
+
+.notice {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-muted);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+.notice strong { color: var(--text); }
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+/* Inline audio play button in the result head. */
+.audio-inline { display: flex; align-items: center; gap: 10px; }
+.audio-inline .audio-hint { font-size: 0.78rem; color: var(--text-muted); }
+.audio-inline audio { height: 36px; }
+
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Working / busy line. */
+.busy-line {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-muted); font-size: 0.9rem;
+  padding: 4px 2px;
+}
+
+.footer-note {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  max-width: 62ch;
+  margin: 4px auto 0;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------- Warli paintings */
+/* Faint wall-painting behind everything; the app content sits above it. */
+.warli-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  color: var(--accent);
+  opacity: 0.05;
+}
+
+/* Triangle strip framing the very top of the page. */
+.warli-top {
+  display: block;
+  width: 100%;
+  height: 16px;
+  color: var(--accent);
+  opacity: 0.45;
+}
+
+/* Tarpa-dance divider between the header and the composer. */
+.warli-divider {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: -4px auto;
+  color: var(--accent);
+  opacity: 0.55;
+}
+
+/* Footer: the main white-on-terracotta mural band. */
+.app-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+.warli-mural {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  background:
+    radial-gradient(120% 150% at 50% -10%, rgba(255, 255, 255, 0.14), transparent 55%),
+    linear-gradient(160deg, #c95730 0%, #a8431f 52%, #8d3617 100%);
+}
+.warli-mural svg { display: block; width: 100%; height: auto; }
+
+/* ---------------------------------------------------------------- layout */
+@media (max-width: 560px) {
+  .app { padding: 28px 14px 56px; gap: 16px; }
+  .composer-bar { padding: 10px 12px; }
+  .composer-actions { flex-wrap: wrap; }
+  .send-btn { flex: 1 1 100%; justify-content: center; }
+  .tool-status { display: none; }
 }

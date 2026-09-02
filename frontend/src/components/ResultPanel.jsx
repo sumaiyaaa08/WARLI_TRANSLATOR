@@ -1,8 +1,10 @@
 import React from 'react'
+import AudioPlayer from './AudioPlayer'
 
-// Displays the translation result: source text, Warli output (Devanagari),
-// romanization, unmatched/corrected token chips, and the TTS approximation notice.
-export default function ResultPanel({ result }) {
+// Clean result card: source line, Warli output (Devanagari) + romanization,
+// inline audio playback, token chips, and the TTS approximation notice. Audio is
+// rendered inline in the head (Google-Translate style) instead of a separate box.
+export default function ResultPanel({ result, audioBase64, audioMime, outputMode }) {
   if (!result) return null
   const {
     source_text: sourceText,
@@ -14,20 +16,28 @@ export default function ResultPanel({ result }) {
     tts,
   } = result
 
-  return (
-    <div className="panel">
-      <h2 className="panel-title">Result</h2>
+  const hasAudio = outputMode === 'speech' && Boolean(audioBase64)
 
-      <div className="result-block">
-        <div className="result-label">You said (transcribed)</div>
-        <div className="result-source">{sourceText || '—'}</div>
+  return (
+    <div className="card result-card">
+      <div className="result-head">
+        <span className="result-lang">Warli · Devanagari</span>
+        {hasAudio ? (
+          <AudioPlayer audioBase64={audioBase64} mime={audioMime || 'audio/mpeg'} />
+        ) : outputMode === 'text' ? (
+          <span className="audio-hint">Switch to “Text + Speech” to hear it</span>
+        ) : null}
       </div>
 
-      <div className="result-block">
-        <div className="result-label" id="warli-out-label">Warli</div>
-        <div className="result-warli devanagari" aria-labelledby="warli-out-label" lang="mr">
-          {warliText || '—'}
+      {sourceText && (
+        <div className="result-source">
+          <span className="src-label">You said</span>
+          <span className="src-text">{sourceText}</span>
         </div>
+      )}
+
+      <div>
+        <div className="result-warli devanagari" lang="mr">{warliText || '—'}</div>
         {warliRoman && <div className="result-roman">{warliRoman}</div>}
       </div>
 
@@ -56,9 +66,11 @@ export default function ResultPanel({ result }) {
         <div className="notice">
           <strong>Speech is an approximation.</strong> {tts.note}
           {tts.pronunciation_layer_applied && (
-            <span> The optional Warli pronunciation layer was applied.</span>
+            <span> The Warli pronunciation layer was applied.</span>
           )}
-          {tts.voice_lang && <span> Voice: {tts.voice_lang === 'hi' ? 'Hindi' : tts.voice_lang}.</span>}
+          {tts.voice_lang && (
+            <span> Voice: {tts.voice_lang === 'hi' ? 'Hindi' : tts.voice_lang === 'mr' ? 'Marathi' : tts.voice_lang}.</span>
+          )}
         </div>
       )}
       {tts && !tts.generated && tts.note && (

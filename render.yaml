@@ -42,12 +42,13 @@ services:
       - key: WARLI_TRANSLATION_ENGINE
         value: rule
 
-      # TTS — APPROXIMATION (Hindi/Marathi voice reading Warli Devanagari).
-      # gTTS needs outbound internet; Render provides it.
+      # TTS — APPROXIMATION (voice reading Warli Devanagari). gTTS needs outbound
+      # internet; Render provides it. Warli is a Marathi-family language, so the
+      # Marathi voice ('mr') pronounces it better than Hindi ('hi').
       - key: WARLI_TTS_ENABLED
         value: "true"
       - key: WARLI_TTS_LANG
-        value: hi
+        value: mr
 
       # Optional pronunciation layer (decoupled).
       - key: WARLI_PRONUNCIATION_ENABLED

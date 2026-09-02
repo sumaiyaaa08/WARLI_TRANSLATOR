@@ -48,7 +48,12 @@ class TTSResult:
 
 
 class GttsWarli:
-    """Hindi/Marathi gTTS voice reading Warli Devanagari (approximation)."""
+    """Marathi (preferred) / Hindi gTTS voice reading Warli Devanagari.
+
+    Warli is a Marathi-family language, so the default voice is Marathi ('mr');
+    it maps Devanagari to Warli sounds more faithfully than Hindi. Still an
+    approximation — there is no true Warli TTS model.
+    """
 
     def synthesize(self, warli_text: str) -> TTSResult:
         if not settings.tts_enabled:
@@ -69,7 +74,7 @@ class GttsWarli:
         text_for_tts, changed, applied = layer.adjust(warli_text)
 
         # 2) Synthesize with the closest available voice.
-        lang = settings.tts_voice_lang or "hi"
+        lang = settings.tts_voice_lang or "mr"
         try:
             tts = gTTS(text=text_for_tts, lang=lang, slow=settings.tts_slow)
             buf = io.BytesIO()

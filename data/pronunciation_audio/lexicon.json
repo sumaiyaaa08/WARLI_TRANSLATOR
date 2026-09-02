@@ -1,19 +1,32 @@
 {
   "_meta": {
-    "name": "Warli pronunciation lexicon (OPTIONAL module - seed)",
-    "description": "word -> phonetic respelling used to NUDGE a Hindi/Marathi TTS voice toward more authentic Warli pronunciation before synthesis. Derived from the lipi/pronunciation research papers + transcribed YouTube/field audio. This module is fully DECOUPLED: if this file is empty or missing, TTS reads the Devanagari text unchanged. Accuracy scales with how much transcribed Warli audio the team collects.",
-    "status": "SEED / OPTIONAL. Extend `lexicon` as more audio is transcribed.",
-    "schema_version": "1.0",
+    "name": "Warli pronunciation lexicon (OPTIONAL module)",
+    "description": "word -> phonetic respelling used to NUDGE the TTS voice toward more authentic Warli pronunciation before synthesis. Fully DECOUPLED: if this file is empty or missing, TTS reads the Devanagari text unchanged. Accuracy scales with how much transcribed Warli audio the team collects and verifies.",
+    "status": "SEEDED from published descriptions of Warli phonology (see sources.md). Entries tagged 'needs field validation' are research-derived and not yet confirmed by a native speaker. Extend/replace them as field or YouTube audio is transcribed.",
+    "schema_version": "1.1",
+    "tts_voice": "Marathi ('mr'). Warli (Varli) is an Indo-Aryan language usually classified as a Marathi dialect, so a Marathi gTTS voice reads Warli Devanagari more accurately than a Hindi voice. Configure via WARLI_TTS_LANG in backend/app/config.py.",
+    "sound_patterns": [
+      "Final '-a' (आ) often becomes '-o' (ओ): paisa->paiso, ghoda->ghodo, amba->ambo.",
+      "Plural '-e' (ए) often becomes '-a' (आ): ambe->amba, ghode->ghoda.",
+      "Marathi final '-en' often becomes Warli '-an': sonen->sonan (gold), rupen->rupan (silver).",
+      "Warli tends to use 's' where Marathi uses 'sh', and 'ya' where other languages use 'ha'.",
+      "Case markers: subject often ends in 'u'/'o'/'a'; object takes 'la'; instrumental takes 'an'.",
+      "Sources: K.J. Save (1945) 'The Warlis'; Smita Patil (2017) 'Warli' (People's Linguistic Survey of India); summarized at indiandistricts.in (Palghar / Language)."
+    ],
     "entry_fields": {
-      "warli": "Warli token in Devanagari (the key).",
+      "warli": "Warli token in Devanagari (the key) exactly as the translation engine emits it.",
       "respell": "Devanagari respelling fed to the TTS voice to approximate true Warli sounds.",
       "ipa": "Optional IPA-like notation for documentation/future fine-tuning.",
-      "source": "Where the pronunciation was heard, e.g. 'youtube:<id>@00:23' or 'field:palghar'. Credit sources in sources.md."
+      "source": "Where the pronunciation came from, e.g. 'youtube:<id>@00:23', 'field:palghar', or a published reference. Credit sources in sources.md."
     }
   },
   "lexicon": [
-    { "warli": "पाणी",  "respell": "पावऽणी",  "ipa": "paːʋəɳiː",  "source": "research_paper:pronunciation p.4" },
-    { "warli": "मादे",  "respell": "मादऽ",    "ipa": "maːdə",     "source": "research_paper:pronunciation p.6" },
-    { "warli": "वयर",   "respell": "वऽयार",   "ipa": "ʋəjaːr",    "source": "research_paper:lipi p.3" }
+    { "warli": "पाणी", "respell": "पावऽणी", "ipa": "paːʋəɳiː", "source": "research_paper:pronunciation p.4 (water)" },
+    { "warli": "मादे", "respell": "मादऽ", "ipa": "maːdə", "source": "research_paper:pronunciation p.6" },
+    { "warli": "वयर", "respell": "वऽयार", "ipa": "ʋəjaːr", "source": "research_paper:lipi p.3 (up/above)" },
+    { "warli": "पैसा", "respell": "पैसो", "ipa": "pɛːsoː", "source": "sound-pattern a->o 'paiso' (Save 1945; Patil 2017 via indiandistricts.in) — money; needs field validation" },
+    { "warli": "घोडा", "respell": "घोडो", "ipa": "ɡʱoːɖoː", "source": "sound-pattern a->o 'ghodo' (Save 1945; Patil 2017 via indiandistricts.in) — horse; needs field validation" },
+    { "warli": "आंबा", "respell": "आंबो", "ipa": "aːmboː", "source": "sound-pattern a->o 'ambo' (Save 1945; Patil 2017 via indiandistricts.in) — mango; needs field validation" },
+    { "warli": "सोनं", "respell": "सोनान", "ipa": "soːnaːn", "source": "sound-pattern en->an 'sonan' (Save 1945; Patil 2017 via indiandistricts.in) — gold; needs field validation" }
   ]
 }

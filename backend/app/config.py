@@ -61,7 +61,11 @@ class Settings:
     # Hindi/Marathi voice (gTTS) to read Devanagari Warli text. Flagged clearly
     # in services/tts.py and the API response metadata.
     tts_enabled: bool = field(default_factory=lambda: _env_bool("WARLI_TTS_ENABLED", True))
-    tts_voice_lang: str = field(default_factory=lambda: os.getenv("WARLI_TTS_LANG", "hi"))  # 'hi' or 'mr'
+    # Warli (Varli) is an Indo-Aryan language usually classified as a Marathi
+    # dialect, so a Marathi voice reads Warli Devanagari noticeably more accurately
+    # than a Hindi voice (e.g. it keeps the retroflex ळ/ण and Marathi vowel lengths).
+    # Default 'mr'; set WARLI_TTS_LANG=hi to fall back to the Hindi voice.
+    tts_voice_lang: str = field(default_factory=lambda: os.getenv("WARLI_TTS_LANG", "mr"))  # 'mr' (default) or 'hi'
     tts_slow: bool = field(default_factory=lambda: _env_bool("WARLI_TTS_SLOW", False))
 
     # --- Optional pronunciation fine-tuning module ---------------------------

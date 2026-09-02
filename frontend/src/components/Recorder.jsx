@@ -1,10 +1,38 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-// Microphone recorder + file upload. Produces an audio Blob via onCapture(blob, filename).
-// Uses the MediaRecorder API; requests a mimeType the browser supports.
+// Inline speech controls for the unified composer: a round mic button (record /
+// stop) and an upload button, plus a compact status line. Produces an audio Blob
+// via onCapture(blob, filename). Uses the MediaRecorder API and picks a mimeType
+// the current browser supports.
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10v1a7 7 0 0 0 14 0v-1" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+    </svg>
+  )
+}
+function StopIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="6" y="6" width="12" height="12" rx="2.5" />
+    </svg>
+  )
+}
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  )
+}
+
 export default function Recorder({ onCapture, disabled }) {
   const [recording, setRecording] = useState(false)
-  const [status, setStatus] = useState('Idle. Tap the mic and speak in English or Hindi.')
+  const [status, setStatus] = useState('Tap the mic and speak')
   const [error, setError] = useState(null)
   const mediaRecorderRef = useRef(null)
   const chunksRef = useRef([])
@@ -19,7 +47,7 @@ export default function Recorder({ onCapture, disabled }) {
   async function startRecording() {
     setError(null)
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Recording is not supported in this browser. Use the upload option instead.')
+      setError('Recording unsupported here — use upload')
       return
     }
     try {
@@ -42,10 +70,10 @@ export default function Recorder({ onCapture, disabled }) {
 
       mr.start()
       setRecording(true)
-      setStatus('Recording… tap Stop when done.')
+      setStatus('Recording… tap to stop')
     } catch (err) {
-      setError(err?.message || 'Could not access the microphone.')
-      setStatus('Microphone unavailable.')
+      setError(err?.message || 'Could not access the microphone')
+      setStatus('Microphone unavailable')
     }
   }
 
@@ -71,35 +99,42 @@ export default function Recorder({ onCapture, disabled }) {
   }, [])
 
   return (
-    <div>
-      <div className="recorder">
-        <button
-          type="button"
-          className={`mic-btn${recording ? ' recording' : ''}`}
-          onClick={recording ? stopRecording : startRecording}
+    <>
+      <button
+        type="button"
+        className={`icon-btn${recording ? ' recording' : ''}`}
+        onClick={recording ? stopRecording : startRecording}
+        disabled={disabled}
+        aria-label={recording ? 'Stop recording' : 'Start recording'}
+        title={recording ? 'Stop recording' : 'Record speech'}
+      >
+        {recording ? <StopIcon /> : <MicIcon />}
+      </button>
+
+      <label
+        className="icon-btn"
+        title="Upload an audio file"
+        aria-label="Upload an audio file"
+        style={disabled ? { opacity: 0.45, pointerEvents: 'none' } : undefined}
+      >
+        <UploadIcon />
+        <input
+          type="file"
+          className="file-input"
+          accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm,.flac"
+          onChange={onFileChange}
           disabled={disabled}
-          aria-label={recording ? 'Stop recording' : 'Start recording'}
-        >
-          <span className="mic-dot" aria-hidden="true" />
-          {recording ? 'Stop' : 'Record'}
-        </button>
-        <span className="status-text" role="status" aria-live="polite">{status}</span>
-      </div>
+        />
+      </label>
 
-      <div className="upload-row">
-        <label className="file-label">
-          Upload audio file
-          <input
-            type="file"
-            accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm,.flac"
-            onChange={onFileChange}
-            disabled={disabled}
-          />
-        </label>
-        <span className="status-text">.wav, .mp3, .m4a, .ogg, .webm</span>
-      </div>
-
-      {error && <p className="error" style={{ marginTop: 12 }}>{error}</p>}
-    </div>
+      <span
+        className="tool-status"
+        role="status"
+        aria-live="polite"
+        style={error ? { color: 'var(--danger)' } : undefined}
+      >
+        {error || status}
+      </span>
+    </>
   )
 }
