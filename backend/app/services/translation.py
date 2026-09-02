@@ -18,7 +18,8 @@ PIPELINE (RuleBasedTranslator)
       -> LOOKUP: greedy longest-phrase match, then single word, then
                  postposition map. Unmatched tokens pass through flagged.
       -> GRAMMAR RULES: reorder to Warli SOV order + apply coarse inflection
-                 suffixes triggered by source cues (is/are -> present, was -> past).
+                 affixes triggered by source cues (is/are -> present, was -> past,
+                 will -> future, not -> negation prefix).
       -> SPELLING CORRECTION: apply wrong->correct pairs from the annotated
                  voice recording (corrections.json) to normalize output.
       -> join into Warli text (+ romanized gloss where the dictionary has one).
@@ -35,7 +36,7 @@ import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from ..config import settings
 
@@ -55,6 +56,7 @@ class MappedToken:
     pos: Optional[str] = None
     roman: Optional[str] = None
     is_postposition: bool = False
+    inflected: bool = False  # True once a grammar affix has been attached
 
 
 @dataclass
@@ -109,6 +111,8 @@ class Dictionary:
         # lang -> {normalized key -> entry}
         self._word_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}}
         self._phrase_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}}
+        # single-word Warli headword -> part of speech (see `warli_pos`)
+        self._warli_pos: Dict[str, Optional[str]] = {}
         self.load()
 
     def load(self) -> None:
@@ -116,9 +120,13 @@ class Dictionary:
         self.entries = raw.get("entries", []) if isinstance(raw, dict) else []
         self._word_maps = {"en": {}, "hi": {}}
         self._phrase_maps = {"en": {}, "hi": {}}
+        self._warli_pos = {}
         for entry in self.entries:
             if not isinstance(entry, dict) or not entry.get("warli"):
                 continue
+            warli = str(entry["warli"]).strip()
+            if " " not in warli:
+                self._warli_pos.setdefault(warli, entry.get("pos"))
             for lang in ("en", "hi"):
                 key = entry.get(lang)
                 if not key:
@@ -154,6 +162,15 @@ class Dictionary:
     def all_entries(self) -> List[dict]:
         return list(self.entries)
 
+    def warli_pos(self, warli: str) -> Optional[str]:
+        """Part of speech of a single-word Warli headword.
+
+        Used to classify multi-word phrase entries: a phrase such as
+        "give water" -> "पाणी दे" carries pos="phrase", which says nothing about
+        whether it is verbal. Looking at its LAST Warli word resolves that.
+        """
+        return self._warli_pos.get(str(warli).strip())
+
 
 class GrammarRules:
     """Word-order + inflection + postposition rules from grammar_rules.json."""
@@ -161,10 +178,24 @@ class GrammarRules:
     def __init__(self, path: Path):
         self.path = path
         self.raw: dict = {}
+        self._function_words: Dict[str, Set[str]] = {"en": set(), "hi": set()}
         self.load()
 
     def load(self) -> None:
         self.raw = _load_json(self.path, {}) or {}
+        fw = self.raw.get("function_words", {}) or {}
+        self._function_words = {
+            lang: {str(w).strip().lower() for w in (fw.get(lang) or []) if str(w).strip()}
+            for lang in ("en", "hi")
+        }
+
+    def function_words(self, lang: str) -> Set[str]:
+        """Grammatical words with no Warli equivalent (articles, copulas, tense
+        auxiliaries). They are dropped from the output instead of being echoed
+        back in the source language, but remain available to `cue_rules` because
+        those match against the raw source tokens.
+        """
+        return self._function_words.get(lang, set())
 
     @property
     def target_order(self) -> str:
@@ -259,6 +290,9 @@ class RuleBasedTranslator(TranslationEngine):
 
     name = "rule"
 
+    # Parts of speech that occupy Warli's final SOV predicate slot.
+    PREDICATE_POS = ("verb", "cop")
+
     def __init__(self) -> None:
         self.dictionary = Dictionary(settings.dictionary_path)
         self.grammar = GrammarRules(settings.grammar_rules_path)
@@ -328,6 +362,7 @@ class RuleBasedTranslator(TranslationEngine):
     def _lookup(self, tokens: List[str], lang: str, warnings: List[str]) -> List[MappedToken]:
         mapped: List[MappedToken] = []
         postpositions = self.grammar.postpositions(lang)
+        function_words = self.grammar.function_words(lang)
         i = 0
         n = len(tokens)
         while i < n:
@@ -364,6 +399,15 @@ class RuleBasedTranslator(TranslationEngine):
             # Single-word lookup.
             token = tokens[i]
             lead, core, trail = _strip_punct(token)
+            # Drop standalone function words (articles, copulas, tense auxiliaries).
+            # They have no Warli equivalent and are already consumed as inflection
+            # cues; echoing them leaked English words into the Warli output and let
+            # the copula pick up a tense suffix ("is" -> "आहेता"). This runs AFTER
+            # phrase matching, so multi-word entries like "how are you" still
+            # resolve as a whole instead of losing their middle word.
+            if core and core.lower() in function_words:
+                i += 1
+                continue
             entry = self.dictionary.lookup(core, lang) if core else None
             if entry:
                 mapped.append(
@@ -393,45 +437,86 @@ class RuleBasedTranslator(TranslationEngine):
         return mapped
 
     # ----------------------------------------------------------- 2) grammar
+    def _is_predicate(self, m: MappedToken) -> bool:
+        """True if this token belongs in Warli's final predicate slot.
+
+        Lexical verbs and the copula qualify directly. A multi-word phrase entry
+        qualifies when its LAST Warli word is verbal — "give water" -> "पाणी दे"
+        must move to the end, but a nominal phrase must not. Without this the
+        ~500 pos="phrase" dictionary entries were invisible to the reorderer, so
+        any sentence that matched one kept its source word order entirely.
+        """
+        if m.pos in self.PREDICATE_POS:
+            return True
+        if m.pos == "phrase" and m.warli and " " in m.warli:
+            return self.dictionary.warli_pos(m.warli.split()[-1]) in self.PREDICATE_POS
+        return False
+
     def _apply_grammar(self, mapped: List[MappedToken], tokens: List[str], lang: str) -> List[MappedToken]:
         result = list(mapped)
 
-        # 2a) Word order: Warli is predominantly SOV. Move verb tokens to the end
-        #     while preserving the relative order of everything else. For Hindi
+        # 2a) Word order: Warli is predominantly SOV. Move predicate tokens to the
+        #     end while preserving the relative order of everything else. For Hindi
         #     input (already SOV) this is effectively a no-op.
+        #
+        #     A predicate is either a lexical verb (pos="verb") or the copula
+        #     (pos="cop", Warli "हाय"), so "I have money" -> "मी पैसे हाय".
+        #     The copula is deliberately EXCLUDED from the inflection step below
+        #     (cue rules target to_pos="verb"); that is what stops the perfective
+        #     cue on "have" from gluing a suffix onto it ("आहे" -> "आहेलं").
         if self.grammar.target_order == "SOV":
-            verbs = [m for m in result if (m.pos == "verb")]
-            non_verbs = [m for m in result if m.pos != "verb"]
-            if verbs and non_verbs:
-                # Only reorder if a verb appears before a non-verb (i.e. SVO-ish).
-                first_verb_idx = next(
-                    (idx for idx, m in enumerate(result) if m.pos == "verb"), None
+            is_pred = [self._is_predicate(m) for m in result]
+            preds = [m for m, p in zip(result, is_pred) if p]
+            others = [m for m, p in zip(result, is_pred) if not p]
+            # Only reorder if a predicate appears before a non-predicate (SVO-ish).
+            if preds and others:
+                first_pred_idx = is_pred.index(True)
+                last_other_idx = max(
+                    (idx for idx, p in enumerate(is_pred) if not p), default=-1
                 )
-                last_nonverb_idx = max(
-                    (idx for idx, m in enumerate(result) if m.pos != "verb"), default=-1
-                )
-                if first_verb_idx is not None and first_verb_idx < last_nonverb_idx:
-                    result = non_verbs + verbs
+                if first_pred_idx < last_other_idx:
+                    result = others + preds
 
-        # 2b) Inflection: detect source cues (is/are/am, was/were) and append the
-        #     matching suffix to the LAST verb token. Deliberately simple; refine
-        #     against the research papers in grammar_rules.json.
+        # 2b) Inflection: detect source cues (is/are/am, was/were, will, not...)
+        #     and attach the matching affix to the LAST eligible token.
+        #     Affix keys ending in `_prefix` are prepended (negation -> "नाही कर");
+        #     everything else is appended (future -> "कर" + "ईल" = "करईल").
+        #     Deliberately simple; refine against the research papers.
         lowered = [t.lower() for t in tokens] if lang == "en" else list(tokens)
         for rule in self.grammar.cue_rules:
             cues = list(rule.get("match_any_en", []) if lang == "en" else rule.get("match_any_hi", []))
             cues = [c.lower() for c in cues]
             if not any(c in lowered for c in cues):
                 continue
-            suffix_key = rule.get("apply")
+            affix_key = str(rule.get("apply") or "")
             target_pos = rule.get("to_pos", "verb")
-            suffix = self.grammar.inflections.get(suffix_key)
-            if not suffix:
+            affix = self.grammar.inflections.get(affix_key)
+            if not affix:
                 continue
-            # Append to the last matching token (do not double-append).
+            is_prefix = affix_key.endswith("_prefix")
+            # Skip the whole rule if the affix is already present as its own
+            # token — "I do not know" matches "not" -> "नाही" during lookup, so
+            # affixing the verb as well would emit "... नाही नाही जाण".
+            if any(m.warli == affix for m in result):
+                continue
             for m in reversed(result):
-                if m.pos == target_pos and not m.warli.endswith(suffix):
-                    m.warli = m.warli + suffix
-                    break
+                if m.pos != target_pos:
+                    continue
+                # Only inflect real dictionary words. Postpositions ("कडे", "मादे")
+                # and unmatched passthrough tokens must stay untouched, otherwise
+                # they pick up nonsense affixes (e.g. "घरात" + plural marker).
+                if not m.matched or m.is_postposition:
+                    continue
+                # Tense/aspect cues are alternatives, not cumulative: one affix
+                # per token, so "was ... not" cannot stack into "करला नाहीला".
+                if m.inflected:
+                    continue
+                already = m.warli.startswith(affix) if is_prefix else m.warli.endswith(affix)
+                if already:
+                    continue
+                m.warli = affix + m.warli if is_prefix else m.warli + affix
+                m.inflected = True
+                break
         return result
 
     # -------------------------------------------------------- 3) corrections

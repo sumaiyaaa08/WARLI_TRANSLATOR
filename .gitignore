@@ -45,3 +45,4 @@ data/voice_recording/*.mp3
 data/voice_recording/*.m4a
 data/pronunciation_audio/*.wav
 data/pronunciation_audio/*.mp3
+.vercel
