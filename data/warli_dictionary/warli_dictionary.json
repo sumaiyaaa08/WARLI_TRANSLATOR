@@ -2,7 +2,7 @@
   "_meta": {
     "name": "Warli Dictionary",
     "description": "English/Hindi -> Warli (Devanagari, Palghar dialect) word, phrase and sentence lookup table.",
-    "status": "PRODUCTION — 2100+ entries: everyday vocabulary, irregular plural headwords, English modals/auxiliaries, Hindi conjugated verb stems and oblique pronouns, phrases, and sentences.",
+    "status": "PRODUCTION — 2178 entries: everyday vocabulary including quantifiers/indefinite pronouns, commerce, arts, technology, civic, health, agriculture, time, high-frequency verbs/adjectives/adverbs, plus irregular plurals, phrases and sentences.",
     "script": "Devanagari",
     "dialect": "Palghar",
     "schema_version": "2.0",
@@ -17315,6 +17315,426 @@
       "en": "no one",
       "hi": "कोई नहीं",
       "pos": "det"
+    },
+    {
+      "warli": "सगळे",
+      "roman": "sagle",
+      "en": "everyone",
+      "hi": "सभी",
+      "pos": "pron"
+    },
+    {
+      "warli": "सर्व",
+      "roman": "sarva",
+      "en": "everybody",
+      "hi": "सब लोग",
+      "pos": "pron"
+    },
+    {
+      "warli": "कुणीएक",
+      "roman": "kuniek",
+      "en": "somebody",
+      "hi": "कोई एक",
+      "pos": "pron"
+    },
+    {
+      "warli": "कुणीही",
+      "roman": "kunihi",
+      "en": "anyone",
+      "hi": "कोई भी",
+      "pos": "pron"
+    },
+    {
+      "warli": "कोणीही",
+      "roman": "konihi",
+      "en": "anybody",
+      "hi": "कोई भी",
+      "pos": "pron"
+    },
+    {
+      "warli": "काहीतरी",
+      "roman": "kahitari",
+      "en": "something",
+      "hi": "कुछ",
+      "pos": "pron"
+    },
+    {
+      "warli": "काहीही",
+      "roman": "kahihi",
+      "en": "anything",
+      "hi": "कुछ भी",
+      "pos": "pron"
+    },
+    {
+      "warli": "सगळं काही",
+      "roman": "sagla kahi",
+      "en": "everything",
+      "hi": "सब कुछ",
+      "pos": "pron"
+    },
+    {
+      "warli": "दुसरा",
+      "roman": "dusra",
+      "en": "another",
+      "hi": "दूसरा",
+      "pos": "det"
+    },
+    {
+      "warli": "स्वतःचा",
+      "roman": "svatahcha",
+      "en": "own",
+      "hi": "अपना",
+      "pos": "adj"
+    },
+    {
+      "warli": "स्वतः",
+      "roman": "svatah",
+      "en": "myself",
+      "hi": "खुद",
+      "pos": "pron"
+    },
+    {
+      "warli": "म्हणून",
+      "roman": "mhanun",
+      "en": "so",
+      "hi": "इसलिए",
+      "pos": "conj"
+    },
+    {
+      "warli": "जरी",
+      "roman": "jari",
+      "en": "although",
+      "hi": "हालाँकि",
+      "pos": "conj"
+    },
+    {
+      "warli": "जेव्हा",
+      "roman": "jenvha",
+      "en": "while",
+      "hi": "जबकि",
+      "pos": "conj"
+    },
+    {
+      "warli": "कोणता",
+      "roman": "konata",
+      "en": "which",
+      "hi": "जो",
+      "pos": "det"
+    },
+    {
+      "warli": "सुद्धा",
+      "roman": "suddha",
+      "en": "even",
+      "hi": "भी",
+      "pos": "adv"
+    },
+    {
+      "warli": "सहसा",
+      "roman": "sahasa",
+      "en": "usually",
+      "hi": "आमतौर पर",
+      "pos": "adv"
+    },
+    {
+      "warli": "नंतर",
+      "roman": "nantar",
+      "en": "later",
+      "hi": "बाद में",
+      "pos": "adv"
+    },
+    {
+      "warli": "कदाचित",
+      "roman": "kadachit",
+      "en": "perhaps",
+      "hi": "शायद",
+      "pos": "adv"
+    },
+    {
+      "warli": "अलीकडे",
+      "roman": "alikade",
+      "en": "recently",
+      "hi": "हाल ही में",
+      "pos": "adv"
+    },
+    {
+      "warli": "व्यापार",
+      "roman": "vyapar",
+      "en": "commerce",
+      "hi": "वाणिज्य",
+      "pos": "noun"
+    },
+    {
+      "warli": "किंमत",
+      "roman": "kimmat",
+      "en": "cost",
+      "hi": "लागत",
+      "pos": "noun"
+    },
+    {
+      "warli": "कर",
+      "roman": "kar",
+      "en": "tax",
+      "hi": "कर",
+      "pos": "noun"
+    },
+    {
+      "warli": "माल",
+      "roman": "maal",
+      "en": "goods",
+      "hi": "सामान",
+      "pos": "noun"
+    },
+    {
+      "warli": "उत्पादन",
+      "roman": "utpadan",
+      "en": "product",
+      "hi": "उत्पादन",
+      "pos": "noun"
+    },
+    {
+      "warli": "सेवा",
+      "roman": "seva",
+      "en": "service",
+      "hi": "सेवा",
+      "pos": "noun"
+    },
+    {
+      "warli": "कंपनी",
+      "roman": "kampani",
+      "en": "company",
+      "hi": "कंपनी",
+      "pos": "noun"
+    },
+    {
+      "warli": "कार्यालय",
+      "roman": "karyalay",
+      "en": "office",
+      "hi": "कार्यालय",
+      "pos": "noun"
+    },
+    {
+      "warli": "नोकरी",
+      "roman": "nokri",
+      "en": "job",
+      "hi": "नौकरी",
+      "pos": "noun"
+    },
+    {
+      "warli": "पगार",
+      "roman": "pagar",
+      "en": "salary",
+      "hi": "वेतन",
+      "pos": "noun"
+    },
+    {
+      "warli": "रुपया",
+      "roman": "rupaya",
+      "en": "rupee",
+      "hi": "रुपया",
+      "pos": "noun"
+    },
+    {
+      "warli": "नाणं",
+      "roman": "nanam",
+      "en": "coin",
+      "hi": "सिक्का",
+      "pos": "noun"
+    },
+    {
+      "warli": "कला",
+      "roman": "kala",
+      "en": "arts",
+      "hi": "कला",
+      "pos": "noun"
+    },
+    {
+      "warli": "चित्रकारी",
+      "roman": "chitrakari",
+      "en": "painting",
+      "hi": "चित्रकारी",
+      "pos": "noun"
+    },
+    {
+      "warli": "रेखाटन",
+      "roman": "rekatan",
+      "en": "drawing",
+      "hi": "रेखाचित्र",
+      "pos": "noun"
+    },
+    {
+      "warli": "चित्रपट",
+      "roman": "chitrapat",
+      "en": "cinema",
+      "hi": "सिनेमा",
+      "pos": "noun"
+    },
+    {
+      "warli": "महाविद्यालय",
+      "roman": "mahavidyalay",
+      "en": "college",
+      "hi": "कॉलेज",
+      "pos": "noun"
+    },
+    {
+      "warli": "वाचनालय",
+      "roman": "vachanalay",
+      "en": "library",
+      "hi": "पुस्तकालय",
+      "pos": "noun"
+    },
+    {
+      "warli": "संगणक",
+      "roman": "sanganak",
+      "en": "computer",
+      "hi": "कंप्यूटर",
+      "pos": "noun"
+    },
+    {
+      "warli": "मोबाईल",
+      "roman": "mobail",
+      "en": "mobile",
+      "hi": "मोबाइल",
+      "pos": "noun"
+    },
+    {
+      "warli": "इंटरनेट",
+      "roman": "internet",
+      "en": "internet",
+      "hi": "इंटरनेट",
+      "pos": "noun"
+    },
+    {
+      "warli": "कॅमेरा",
+      "roman": "kamera",
+      "en": "camera",
+      "hi": "कैमरा",
+      "pos": "noun"
+    },
+    {
+      "warli": "मशीन",
+      "roman": "mashin",
+      "en": "machine",
+      "hi": "मशीन",
+      "pos": "noun"
+    },
+    {
+      "warli": "शहर",
+      "roman": "shahar",
+      "en": "city",
+      "hi": "शहर",
+      "pos": "noun"
+    },
+    {
+      "warli": "नगर",
+      "roman": "nagar",
+      "en": "town",
+      "hi": "कस्बा",
+      "pos": "noun"
+    },
+    {
+      "warli": "नागरिक",
+      "roman": "nagarik",
+      "en": "citizen",
+      "hi": "नागरिक",
+      "pos": "noun"
+    },
+    {
+      "warli": "न्यायालय",
+      "roman": "nyayalay",
+      "en": "court",
+      "hi": "अदालत",
+      "pos": "noun"
+    },
+    {
+      "warli": "मंत्री",
+      "roman": "mantri",
+      "en": "minister",
+      "hi": "मंत्री",
+      "pos": "noun"
+    },
+    {
+      "warli": "मत",
+      "roman": "mat",
+      "en": "vote",
+      "hi": "वोट",
+      "pos": "noun"
+    },
+    {
+      "warli": "आजार",
+      "roman": "ajar",
+      "en": "disease",
+      "hi": "बीमारी",
+      "pos": "noun"
+    },
+    {
+      "warli": "शेत",
+      "roman": "shet",
+      "en": "field",
+      "hi": "खेत",
+      "pos": "noun"
+    },
+    {
+      "warli": "प्रयत्न करणे",
+      "roman": "prayatna karane",
+      "en": "try",
+      "hi": "कोशिश करना",
+      "pos": "verb"
+    },
+    {
+      "warli": "वापरणे",
+      "roman": "vaparane",
+      "en": "use",
+      "hi": "उपयोग करना",
+      "pos": "verb"
+    },
+    {
+      "warli": "ठेवणे",
+      "roman": "thevane",
+      "en": "put",
+      "hi": "रखना",
+      "pos": "verb"
+    },
+    {
+      "warli": "वाट पाहणे",
+      "roman": "vat pahane",
+      "en": "wait",
+      "hi": "इंतजार करना",
+      "pos": "verb"
+    },
+    {
+      "warli": "निवडणे",
+      "roman": "nivadane",
+      "en": "choose",
+      "hi": "चुनना",
+      "pos": "verb"
+    },
+    {
+      "warli": "ठरवणे",
+      "roman": "tharavane",
+      "en": "decide",
+      "hi": "तय करना",
+      "pos": "verb"
+    },
+    {
+      "warli": "मान्य करणे",
+      "roman": "manya karane",
+      "en": "agree",
+      "hi": "सहमत होना",
+      "pos": "verb"
+    },
+    {
+      "warli": "अवघड",
+      "roman": "avghad",
+      "en": "difficult",
+      "hi": "कठिन",
+      "pos": "adj"
+    },
+    {
+      "warli": "शक्य",
+      "roman": "shakya",
+      "en": "possible",
+      "hi": "संभव",
+      "pos": "adj"
     }
   ]
 }

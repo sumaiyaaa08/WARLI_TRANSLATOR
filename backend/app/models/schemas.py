@@ -13,10 +13,15 @@ from pydantic import BaseModel, Field
 
 
 class SourceLanguage(str, Enum):
-    """Supported *input* languages (what the user speaks)."""
+    """Supported *input* languages (what the user speaks).
+
+    Warli is a Marathi-family language, so Marathi ('mr') is a first-class input
+    alongside English and Hindi; Whisper transcribes all three.
+    """
 
     en = "en"
     hi = "hi"
+    mr = "mr"
     auto = "auto"  # let ASR / heuristics decide
 
 

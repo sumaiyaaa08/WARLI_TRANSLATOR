@@ -109,8 +109,8 @@ class Dictionary:
         self.path = path
         self.entries: List[dict] = []
         # lang -> {normalized key -> entry}
-        self._word_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}}
-        self._phrase_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}}
+        self._word_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}, "mr": {}}
+        self._phrase_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}, "mr": {}}
         # single-word Warli headword -> part of speech (see `warli_pos`)
         self._warli_pos: Dict[str, Optional[str]] = {}
         self.load()
@@ -118,8 +118,8 @@ class Dictionary:
     def load(self) -> None:
         raw = _load_json(self.path, {"entries": []})
         self.entries = raw.get("entries", []) if isinstance(raw, dict) else []
-        self._word_maps = {"en": {}, "hi": {}}
-        self._phrase_maps = {"en": {}, "hi": {}}
+        self._word_maps = {"en": {}, "hi": {}, "mr": {}}
+        self._phrase_maps = {"en": {}, "hi": {}, "mr": {}}
         self._warli_pos = {}
         for entry in self.entries:
             if not isinstance(entry, dict) or not entry.get("warli"):
@@ -139,6 +139,22 @@ class Dictionary:
                 else:
                     # First entry wins for a duplicate headword.
                     self._word_maps[lang].setdefault(norm, entry)
+            # Marathi ('mr'): index an explicit 'mr' gloss when present, PLUS the
+            # Warli headword itself. Warli is a Marathi-family dialect, so a spoken
+            # Marathi word that equals a Warli headword resolves to that entry (its
+            # Warli translation is the same word) — correct for the large shared
+            # core vocabulary; anything unmatched still passes through in readable
+            # Devanagari. First entry wins for collisions.
+            for key in (entry.get("mr"), warli):
+                if not key:
+                    continue
+                norm = self._norm_key(str(key))
+                if not norm:
+                    continue
+                if " " in norm:
+                    self._phrase_maps["mr"].setdefault(norm, entry)
+                else:
+                    self._word_maps["mr"].setdefault(norm, entry)
         logger.info(
             "Dictionary loaded: %d entries (%s)", len(self.entries), self.path.name
         )
@@ -178,7 +194,7 @@ class GrammarRules:
     def __init__(self, path: Path):
         self.path = path
         self.raw: dict = {}
-        self._function_words: Dict[str, Set[str]] = {"en": set(), "hi": set()}
+        self._function_words: Dict[str, Set[str]] = {"en": set(), "hi": set(), "mr": set()}
         self.load()
 
     def load(self) -> None:
@@ -186,7 +202,7 @@ class GrammarRules:
         fw = self.raw.get("function_words", {}) or {}
         self._function_words = {
             lang: {str(w).strip().lower() for w in (fw.get(lang) or []) if str(w).strip()}
-            for lang in ("en", "hi")
+            for lang in ("en", "hi", "mr")
         }
 
     def function_words(self, lang: str) -> Set[str]:
@@ -484,8 +500,7 @@ class RuleBasedTranslator(TranslationEngine):
         #     Deliberately simple; refine against the research papers.
         lowered = [t.lower() for t in tokens] if lang == "en" else list(tokens)
         for rule in self.grammar.cue_rules:
-            cues = list(rule.get("match_any_en", []) if lang == "en" else rule.get("match_any_hi", []))
-            cues = [c.lower() for c in cues]
+            cues = [str(c).lower() for c in (rule.get(f"match_any_{lang}") or [])]
             if not any(c in lowered for c in cues):
                 continue
             affix_key = str(rule.get("apply") or "")

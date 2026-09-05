@@ -1,0 +1,18 @@
+# Keep the Docker build context small and reproducible. The frontend is rebuilt
+# inside the image (stage 1), so local node_modules/dist and Python caches are
+# excluded. Data files under data/ ARE copied in (not ignored).
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.*
+.git
+.gitignore
+.gitattributes
+.vercel
+.vercel-tmp
+frontend/.vercel
+.qoder
+**/*.md

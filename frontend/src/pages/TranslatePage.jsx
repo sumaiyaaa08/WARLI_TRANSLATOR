@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import SegmentedToggle from '../components/SegmentedToggle'
 import Recorder from '../components/Recorder'
 import ResultPanel from '../components/ResultPanel'
 import { WarliBackdrop, WarliBorder, WarliDivider, WarliMural } from '../components/WarliArt'
@@ -8,12 +7,34 @@ import { translateSpeech, translateText, getHealth } from '../api/client'
 const LANG_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'hi', label: 'Hindi' },
+  { value: 'mr', label: 'Marathi' },
   { value: 'auto', label: 'Auto' },
 ]
 const MODE_OPTIONS = [
   { value: 'text', label: 'Text' },
   { value: 'speech', label: 'Text + Audio' },
 ]
+
+// Accessible segmented toggle (used for From-language and Output-mode).
+// `options` = [{ value, label }]. Uses aria-pressed on each button so screen
+// readers announce the active choice. Kept inline — it is the only control of
+// its kind, so a separate file would be needless sprawl.
+function SegmentedToggle({ name, value, options, onChange, labelledBy }) {
+  return (
+    <div className="segmented" role="group" aria-labelledby={labelledBy} data-toggle={name}>
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          aria-pressed={value === opt.value}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 function SendIcon() {
   return (
@@ -88,7 +109,7 @@ export default function TranslatePage() {
 
         <header className="app-header">
           <h1>Warli <span className="brand-dot">Translator</span></h1>
-          <p>Type or speak in English / Hindi — see and hear it in Warli (Devanagari, Palghar dialect).</p>
+          <p>Type or speak in English / Hindi / Marathi — see and hear it in Warli (Devanagari, Palghar dialect).</p>
         </header>
 
         {/* Slim backend status line */}

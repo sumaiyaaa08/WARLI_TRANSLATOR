@@ -89,6 +89,13 @@ class Settings:
         default_factory=lambda: _env_int("WARLI_MAX_UPLOAD_BYTES", 25 * 1024 * 1024)
     )
 
+    # --- API prefix / single-server frontend --------------------------------
+    # Every JSON endpoint is served under this prefix (default "/api", e.g.
+    # /api/translate/text, /api/health). That frees "/" to serve the built React
+    # app from the SAME process/origin, so the whole product deploys to one
+    # server (no separate frontend host, no cross-origin CORS hop).
+    api_prefix: str = field(default_factory=lambda: os.getenv("WARLI_API_PREFIX", "/api"))
+
     # --- Derived data file paths ---------------------------------------------
     @property
     def dictionary_path(self) -> Path:
@@ -105,6 +112,14 @@ class Settings:
     @property
     def pronunciation_lexicon_path(self) -> Path:
         return self.data_dir / "pronunciation_audio" / "lexicon.json"
+
+    @property
+    def frontend_dist(self) -> Path:
+        """Built React app (frontend/dist). Served at "/" when present so the API
+        and UI run on one origin. Override with WARLI_FRONTEND_DIST."""
+        return Path(
+            os.getenv("WARLI_FRONTEND_DIST", str(_PROJECT_ROOT / "frontend" / "dist"))
+        )
 
 
 settings = Settings()

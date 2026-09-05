@@ -1,34 +1,32 @@
-# Render Blueprint — Warli Speech Translator backend (FastAPI).
+# Render Blueprint — Warli Speech Translator (ONE service: API + frontend).
 # Deploy: Render dashboard -> "New +" -> "Blueprint" -> point at this repo.
-# Render reads this file, creates the web service, and applies the settings below.
+# Render reads this file, builds the root Dockerfile, and applies the settings.
 #
-# NOTE ON DATA: the whole repo is deployed (no rootDir restriction), so the
-# backend can read the sibling `data/` folder. config.py resolves data_dir from
-# its own file location (backend/../data), which stays correct regardless of the
-# process working directory — so we intentionally do NOT set WARLI_DATA_DIR here.
+# SINGLE SERVER: the Docker image builds the React app and runs FastAPI, which
+# serves the JSON API under /api AND the built UI at / — one origin, no separate
+# frontend host, no CORS hop. (The frontend used to be split onto Vercel; it no
+# longer is.) The service name stays `warli-backend` so the existing
+# https://warli-backend.onrender.com URL now serves the whole app.
+#
+# NOTE ON DATA: the whole repo is the Docker build context, so the Dockerfile
+# copies the sibling data/ folder into the image. config.py resolves all paths
+# from its own file location, which stays correct inside the container.
 
 services:
   - type: web
     name: warli-backend
-    runtime: python
-    plan: free                 # upgrade for persistent disk (avoids Whisper re-download on cold start)
+    runtime: docker
+    plan: free                 # upgrade for persistent disk + more RAM (faster ASR)
     region: oregon
-    # Install deps from the backend subfolder, then run uvicorn from there so
-    # `app.main:app` imports cleanly.
-    buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      # Pin a Python that has prebuilt wheels for pydantic-core / faster-whisper.
-      # (3.14 is too new for some native wheels — see README "Known limitations".)
-      - key: PYTHON_VERSION
-        value: 3.12.3
-
-      # ASR (Whisper). Render FREE tier = 512 MB RAM, so use 'tiny' (the 'small'
-      # model will OOM there). Upgrade the instance to use 'base'/'small' for
-      # better accuracy. Set WARLI_ASR_ENABLED=false to run text+TTS only (no
-      # model download, no RAM pressure) — typed text still exercises both modes.
+      # ASR (Whisper). The 'tiny' model is pre-downloaded INTO the image at build
+      # time (see Dockerfile) so cold starts don't re-fetch it — the main fix for
+      # the "slow server" symptom. Render FREE tier = 512 MB RAM, so keep 'tiny';
+      # upgrade the instance to use 'base'/'small' for better accuracy. Set
+      # WARLI_ASR_ENABLED=false to run text+TTS only (no model, less RAM).
       - key: WARLI_ASR_ENABLED
         value: "true"
       - key: WARLI_ASR_MODEL
@@ -54,11 +52,11 @@ services:
       - key: WARLI_PRONUNCIATION_ENABLED
         value: "true"
 
-      # Vercel frontend origin(s) required for browser CORS.
+      # Same-origin now, so the served app needs no CORS. These origins are only
+      # for a local/preview frontend pointed at the deployed API.
       - key: WARLI_CORS_ORIGINS
-        value: https://frontend-wine-nu-6omtlo78t2.vercel.app,https://frontend-2o3ludxj5-inguify.vercel.app
+        value: http://localhost:5173,http://127.0.0.1:5173
 
-      # Cache the Whisper model on Render's disk so it isn't re-fetched within a
-      # running instance. (On the free plan the disk is wiped on spin-down.)
+      # Model cache location inside the image (baked at build time).
       - key: HF_HOME
-        value: /opt/render/project/src/.cache/huggingface
+        value: /app/.cache/huggingface

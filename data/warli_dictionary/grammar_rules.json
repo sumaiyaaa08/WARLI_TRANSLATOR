@@ -8,7 +8,7 @@
   "word_order": {
     "_comment": "Warli, like Marathi/Hindi, is predominantly SOV (subject-object-verb). The reorderer moves verbs to the end and keeps the subject first.",
     "target": "SOV",
-    "source_defaults": { "en": "SVO", "hi": "SOV" }
+    "source_defaults": { "en": "SVO", "hi": "SOV", "mr": "SOV" }
   },
   "function_words": {
     "_comment": "Purely grammatical source words that have no Warli output token: articles, the copula, and tense auxiliaries. They are DROPPED during lookup instead of being echoed back in the source language. They still drive `cue_rules`, because those match against the raw source tokens. Relational words (in/on/to/with/for/from/at/by ...) are deliberately NOT listed here — they resolve through `postpositions`. The modals (would/could/should/may/might/must) are NOT here either; they carry real meaning and live in the dictionary. Warli, like Marathi, routinely omits the present copula, so dropping is/am/are/है/हूँ is linguistically correct and also stops the copula from absorbing a tense suffix ('is' -> 'आहेता').",
@@ -22,6 +22,11 @@
       "हूँ", "है", "हैं", "हूं",
       "था", "थी", "थे",
       "रहा", "रही", "रहे"
+    ],
+    "mr": [
+      "आहे", "आहेस", "आहोत", "आहात", "आहेत",
+      "होता", "होती", "होते", "होतं", "होतो",
+      "असेल", "असतील", "असेन", "असून"
     ]
   },
   "inflections": {
@@ -97,15 +102,40 @@
       "के बाहर": "बाहेर",
       "के यहाँ": "इथे",
       "के वहाँ": "तिथे"
+    },
+    "mr": {
+      "_comment": "Marathi postpositions -> Warli. Many are identical or near-identical (Warli is a Marathi dialect); mapping them keeps output consistent.",
+      "मध्ये": "मादे",
+      "वर": "वयर",
+      "ला": "कडे",
+      "कडे": "कडे",
+      "साठी": "खातीर",
+      "पासून": "सावन",
+      "ने": "नं",
+      "खाली": "खाली",
+      "मागे": "मागे",
+      "समोर": "समोर",
+      "जवळ": "जवळ",
+      "नंतर": "नंतर",
+      "आधी": "आधी",
+      "बद्दल": "बद्दल",
+      "पर्यंत": "पर्यंत",
+      "तून": "तून",
+      "सारखा": "सारखा",
+      "पेक्षा": "परस",
+      "बाहेर": "बाहेर",
+      "येथे": "इथे",
+      "तेथे": "तिथे",
+      "जवळून": "सावन"
     }
   },
   "cue_rules": [
-    { "_comment": "'am/is/are + verb' -> present continuous suffix", "match_any_en": ["am", "is", "are"], "match_any_hi": ["हूँ", "है", "हैं"], "apply": "present_continuous_suffix", "to_pos": "verb" },
-    { "_comment": "'was/were/did' -> past suffix", "match_any_en": ["was", "were", "did"], "match_any_hi": ["था", "थी", "थे"], "apply": "past_suffix", "to_pos": "verb" },
+    { "_comment": "'am/is/are + verb' -> present continuous suffix", "match_any_en": ["am", "is", "are"], "match_any_hi": ["हूँ", "है", "हैं"], "match_any_mr": ["आहे", "आहेस", "आहोत", "आहात", "आहेत"], "apply": "present_continuous_suffix", "to_pos": "verb" },
+    { "_comment": "'was/were/did' -> past suffix", "match_any_en": ["was", "were", "did"], "match_any_hi": ["था", "थी", "थे"], "match_any_mr": ["होता", "होती", "होते", "होतं"], "apply": "past_suffix", "to_pos": "verb" },
     { "_comment": "'will/shall' -> future suffix", "match_any_en": ["will", "shall"], "match_any_hi": ["गा", "गी", "गे", "करूँगा"], "apply": "future_suffix", "to_pos": "verb" },
-    { "_comment": "'always/usually/every day' -> habitual suffix", "match_any_en": ["always", "usually", "often", "every"], "match_any_hi": ["हमेशा", "रोज", "अक्सर"], "apply": "habitual_suffix", "to_pos": "verb" },
+    { "_comment": "'always/usually/every day' -> habitual suffix", "match_any_en": ["always", "usually", "often", "every"], "match_any_hi": ["हमेशा", "रोज", "अक्सर"], "match_any_mr": ["नेहमी", "रोज", "सहसा"], "apply": "habitual_suffix", "to_pos": "verb" },
     { "_comment": "'has/have + past participle' -> perfective suffix", "match_any_en": ["has", "have", "had"], "match_any_hi": ["चुका", "लिया", "दिया"], "apply": "perfective_suffix", "to_pos": "verb" },
     { "_comment": "Hindi progressive 'रहा/रही/रहे'. No English cue: the tokenizer splits on whitespace so a bare 'ing' can never match a token — English progressive is covered by the am/is/are rule above.", "match_any_hi": ["रहा", "रही", "रहे"], "apply": "progressive_suffix", "to_pos": "verb" },
-    { "_comment": "'not/don't/doesn't/didn't' -> negation prefix on the verb", "match_any_en": ["not", "don't", "doesn't", "didn't", "won't", "can't", "never"], "match_any_hi": ["नहीं", "मत", "कभी नहीं"], "apply": "negation_prefix", "to_pos": "verb" }
+    { "_comment": "'not/don't/doesn't/didn't' -> negation prefix on the verb", "match_any_en": ["not", "don't", "doesn't", "didn't", "won't", "can't", "never"], "match_any_hi": ["नहीं", "मत", "कभी नहीं"], "match_any_mr": ["नाही", "नको", "कधीही नाही"], "apply": "negation_prefix", "to_pos": "verb" }
   ]
 }

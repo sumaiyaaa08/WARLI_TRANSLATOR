@@ -3,11 +3,11 @@
 Exercises the REAL components (no mocks):
   1. Translation engine  (dictionary + grammar rules + spelling correction)
   2. Pronunciation layer (optional, decoupled)
-  3. TTS                 (gTTS Hindi voice reading Warli Devanagari) [needs internet]
+  3. TTS                 (gTTS Marathi voice reading Warli Devanagari) [needs internet]
   4. ASR round-trip      (gTTS creates English speech -> faster-whisper transcribes
                           -> translate -> Warli) [downloads Whisper model on first run]
-  5. HTTP endpoints      (FastAPI TestClient: /health, /translate/text, /dictionary,
-                          error handling)
+  5. HTTP endpoints      (FastAPI TestClient: /api/health, /api/translate/text,
+                          /api/dictionary, error handling)
 
 Run from backend/:
     set WARLI_ASR_MODEL=tiny   (small download for the test)
@@ -112,23 +112,23 @@ def t_http():
     from fastapi.testclient import TestClient
     from app.main import app
     with TestClient(app) as client:
-        h = client.get("/health")
+        h = client.get("/api/health")
         assert h.status_code == 200, f"/health {h.status_code}"
         health = h.json()
         assert health["status"] == "ok" and health["dictionary_entries"] > 0
 
-        r = client.post("/translate/text", json={
+        r = client.post("/api/translate/text", json={
             "text": "I drink water", "source_lang": "en", "output_mode": "text",
         })
-        assert r.status_code == 200, f"/translate/text {r.status_code}: {r.text}"
+        assert r.status_code == 200, f"/api/translate/text {r.status_code}: {r.text}"
         body = r.json()
         assert body["warli_text"], "no warli_text in response"
 
-        d = client.get("/dictionary", params={"q": "water"})
+        d = client.get("/api/dictionary", params={"q": "water"})
         assert d.status_code == 200 and d.json()["count"] >= 1, "dictionary search failed"
 
         # Validation error path -> clean JSON with 422
-        bad = client.post("/translate/text", json={})
+        bad = client.post("/api/translate/text", json={})
         assert bad.status_code == 422, f"expected 422, got {bad.status_code}"
         assert bad.json().get("error") == "validation_error", bad.text
 
@@ -145,8 +145,8 @@ def t_http_speech():
     with TestClient(app) as client:
         files = {"audio": ("speech.mp3", buf.getvalue(), "audio/mpeg")}
         data = {"source_lang": "en", "output_mode": "speech"}
-        r = client.post("/translate/speech", files=files, data=data)
-        assert r.status_code == 200, f"/translate/speech {r.status_code}: {r.text}"
+        r = client.post("/api/translate/speech", files=files, data=data)
+        assert r.status_code == 200, f"/api/translate/speech {r.status_code}: {r.text}"
         body = r.json()
         assert body["warli_text"], "no warli_text from speech endpoint"
         has_audio = bool(body.get("audio_base64"))
@@ -159,7 +159,7 @@ def t_http_bad_format():
     from app.main import app
     with TestClient(app) as client:
         files = {"audio": ("notes.txt", b"hello world", "text/plain")}
-        r = client.post("/translate/speech", files=files,
+        r = client.post("/api/translate/speech", files=files,
                         data={"source_lang": "auto", "output_mode": "text"})
         assert r.status_code == 415, f"expected 415 for .txt, got {r.status_code}: {r.text}"
         return f"unsupported format -> 415 ({r.json().get('error')})"

@@ -1,6 +1,9 @@
-// API client for the Warli backend. Uses VITE_API_URL (default "/api", which the
-// Vite dev server proxies to FastAPI). All calls return parsed JSON and throw an
-// Error with the backend's `detail`/`error` message on failure.
+// API client for the Warli backend. Defaults to the relative "/api" base, which
+// works both in dev (the Vite server proxies /api to FastAPI) and in the
+// single-server production build (FastAPI serves the API and this app on one
+// origin). Override with VITE_API_URL only if you host the API elsewhere. All
+// calls return parsed JSON and throw an Error with the backend's `detail`/`error`
+// message on failure.
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 

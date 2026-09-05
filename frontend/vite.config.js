@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Dev server proxies /api to the FastAPI backend so the frontend can use
-// relative URLs (no CORS hassle in dev). Set VITE_API_URL to override.
+// The FastAPI backend serves BOTH its JSON routes (under /api) and — in the
+// single-server production build — this app's static files. So the frontend uses
+// relative /api URLs in dev AND in production. In dev the Vite server proxies
+// /api straight through to FastAPI (no path rewrite, since the backend already
+// lives under /api). Set VITE_PROXY_TARGET to point at a different backend.
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -11,7 +14,6 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

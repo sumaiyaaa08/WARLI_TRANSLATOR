@@ -49,7 +49,7 @@ def _result_to_response(
     return TranslationResponse(
         source_text=result.source_text,
         source_lang=SourceLanguage(result.source_lang)
-        if result.source_lang in ("en", "hi")
+        if result.source_lang in ("en", "hi", "mr")
         else SourceLanguage.auto,
         warli_text=result.warli_text,
         warli_roman=result.warli_roman,
@@ -105,7 +105,7 @@ def _maybe_synthesize(warli_text: str, output_mode: OutputMode):
     "/translate/text",
     response_model=TranslationResponse,
     responses={422: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
-    summary="Translate English/Hindi text to Warli.",
+    summary="Translate English/Hindi/Marathi text to Warli.",
 )
 def translate_text(req: TextTranslateRequest) -> TranslationResponse:
     engine = get_engine()
@@ -127,10 +127,10 @@ def translate_text(req: TextTranslateRequest) -> TranslationResponse:
         422: {"model": ErrorResponse},
         500: {"model": ErrorResponse},
     },
-    summary="Transcribe English/Hindi speech, then translate to Warli.",
+    summary="Transcribe English/Hindi/Marathi speech, then translate to Warli.",
 )
 async def translate_speech(
-    audio: UploadFile = File(..., description="Spoken English/Hindi audio."),
+    audio: UploadFile = File(..., description="Spoken English/Hindi/Marathi audio."),
     source_lang: SourceLanguage = Form(SourceLanguage.auto),
     output_mode: OutputMode = Form(OutputMode.text),
 ) -> TranslationResponse:
@@ -158,7 +158,8 @@ async def translate_speech(
     #    asked for 'auto'.
     detected = asr_result.language or source_lang.value
     lang = detected if source_lang == SourceLanguage.auto else source_lang.value
-    lang = lang if lang in ("en", "hi") else detected if detected in ("en", "hi") else "en"
+    supported = ("en", "hi", "mr")
+    lang = lang if lang in supported else detected if detected in supported else "en"
 
     engine = get_engine()
     result = engine.translate(asr_result.text, source_lang=lang)
@@ -192,7 +193,7 @@ def get_dictionary(
     needle = (q or "").strip().lower()
     entries: list[DictionaryEntry] = []
     for e in dictionary.all_entries():
-        if source_lang and source_lang.value in ("en", "hi") and not e.get(source_lang.value):
+        if source_lang and source_lang.value in ("en", "hi", "mr") and not e.get(source_lang.value):
             continue
         if needle:
             haystack = " ".join(

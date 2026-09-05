@@ -1,10 +1,12 @@
-"""ASR service — speech (English/Hindi) -> text.
+"""ASR service — speech (English/Hindi/Marathi) -> text.
 
 We use an EXISTING pretrained speech-to-text model (Whisper) for input; we do not
-train ASR from scratch. Default backend is `faster-whisper` (CPU friendly, no
-heavy torch install). The model is loaded lazily on first transcription so the
-API boots quickly, and every failure mode degrades to a clear `ASRError` that the
-route layer turns into a JSON error response.
+train ASR from scratch. Whisper natively supports English ('en'), Hindi ('hi')
+and Marathi ('mr'), so the caller's chosen source language is forwarded straight
+to the model — no per-language code is needed here. Default backend is
+`faster-whisper` (CPU friendly, no heavy torch install). The model is loaded lazily
+on first transcription so the API boots quickly, and every failure mode degrades
+to a clear `ASRError` that the route layer turns into a JSON error response.
 
 Swap the backend by setting WARLI_ASR_BACKEND (see config.py). Adding another
 provider (e.g. an OpenAI Whisper HTTP API) means implementing `transcribe()` in a
@@ -35,7 +37,7 @@ class ASRError(RuntimeError):
 @dataclass
 class ASRResult:
     text: str
-    language: str          # detected/forced language code, e.g. 'en'/'hi'
+    language: str          # detected/forced language code, e.g. 'en'/'hi'/'mr'
     backend: str
     duration_seconds: Optional[float] = None
 
