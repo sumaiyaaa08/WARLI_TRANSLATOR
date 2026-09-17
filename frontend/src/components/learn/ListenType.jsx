@@ -63,7 +63,7 @@ export default function ListenType({ exercise, onCorrect, onWrong }) {
     if (correct) {
       setTimeout(onCorrect, 900)
     } else {
-      setTimeout(onWrong, 1200)
+      setTimeout(() => onWrong(exercise.correct), 1200)
     }
   }
 

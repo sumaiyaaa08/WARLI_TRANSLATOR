@@ -60,7 +60,7 @@ export default function MatchPairs({ exercise, onCorrect, onWrong }) {
 
         if (newMatched.size === pairs.length) {
           if (mistakes === 0) onCorrect()
-          else onWrong()
+          else onWrong(null)
         }
       }, 400)
     } else {

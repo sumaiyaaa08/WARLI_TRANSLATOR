@@ -24,6 +24,10 @@ export default function LessonPlayer() {
   const [showComplete, setShowComplete] = useState(false)
   const [sessionXp, setSessionXp] = useState(0)
   const [showNoHearts, setShowNoHearts] = useState(false)
+  // Feedback footer shown after every answer: { ok: bool, xp?: number, answer?: string|null }
+  // Continue (in the footer) is the ONLY way forward — this guarantees the
+  // lesson can never get stuck on a wrong answer.
+  const [feedback, setFeedback] = useState(null)
 
   // Track if we're in the middle of a heart-loss navigation to avoid double-fire
   const navigatingRef = useRef(false)
@@ -61,21 +65,15 @@ export default function LessonPlayer() {
   const exercise = exercises[currentIdx]
 
   function handleCorrect() {
-    if (!lesson) return
+    if (!lesson || feedback) return
     const xpPerExercise = Math.floor(lesson.xp_reward / Math.max(exercises.length, 1))
     addXp(xpPerExercise)
     setSessionXp(prev => prev + xpPerExercise)
-
-    if (currentIdx + 1 < exercises.length) {
-      setTimeout(() => setCurrentIdx(i => i + 1), 1000)
-    } else {
-      completeLesson(lessonId)
-      setShowComplete(true)
-    }
+    setFeedback({ ok: true, xp: xpPerExercise })
   }
 
-  function handleWrong() {
-    if (navigatingRef.current) return
+  function handleWrong(correctAnswer) {
+    if (navigatingRef.current || feedback) return
     loseHeart()
 
     // Check if this was the last heart
@@ -85,6 +83,20 @@ export default function LessonPlayer() {
       navigatingRef.current = true
       setShowNoHearts(true)
       setTimeout(() => navigate('/'), 2000)
+      return
+    }
+    setFeedback({ ok: false, answer: correctAnswer || null })
+  }
+
+  // The ONLY way to advance: Continue in the feedback footer (or lesson end).
+  function handleContinue() {
+    if (!lesson || !feedback) return
+    setFeedback(null)
+    if (currentIdx + 1 < exercises.length) {
+      setCurrentIdx(i => i + 1)
+    } else {
+      completeLesson(lessonId)
+      setShowComplete(true)
     }
   }
 
@@ -134,7 +146,18 @@ export default function LessonPlayer() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#fef9f0' }}>
       <GameHeader />
-      <ProgressBar current={currentIdx} total={exercises.length} />
+      <div className="w-full max-w-lg mx-auto px-4 pt-3 flex items-center">
+        <button
+          onClick={() => navigate('/')}
+          aria-label="Exit lesson"
+          className="text-stone-400 hover:text-stone-600 text-xl font-bold leading-none"
+        >
+          ✕
+        </button>
+        <div className="flex-1">
+          <ProgressBar current={currentIdx} total={exercises.length} />
+        </div>
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-32">
         <AnimatePresence mode="wait">
@@ -149,14 +172,63 @@ export default function LessonPlayer() {
         </AnimatePresence>
       </main>
 
-      {/* Mascot hint — fixed position */}
-      {exercise && (
+      {/* Mascot hint — fixed position, hidden while the feedback footer is up */}
+      {exercise && !feedback && (
         <MascotHint
           exercise={exercise}
           hintsRemaining={hintsRemaining}
           onUse={handleHintUsed}
         />
       )}
+
+      {/* Feedback footer — Duolingo-style red/green bar with Continue.
+          This is the only way to advance, so a wrong answer can never
+          leave the learner stuck. */}
+      <AnimatePresence>
+        {feedback && !showComplete && !showNoHearts && (
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 z-40 border-t-2"
+            style={{
+              backgroundColor: feedback.ok ? '#f0fdf4' : '#fef2f2',
+              borderColor: feedback.ok ? '#22c55e' : '#ef4444',
+            }}
+            initial={{ y: 90 }}
+            animate={{ y: 0 }}
+            exit={{ y: 90 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p
+                  className="text-lg font-bold leading-tight"
+                  style={{ color: feedback.ok ? '#15803d' : '#b91c1c' }}
+                >
+                  {feedback.ok ? '🎉 Correct!' : '😕 Not quite.'}
+                </p>
+                {feedback.ok && feedback.xp > 0 && (
+                  <p className="text-sm font-bold" style={{ color: '#f97316' }}>
+                    +{feedback.xp} XP
+                  </p>
+                )}
+                {!feedback.ok && (
+                  <p className="text-base font-semibold text-stone-700 leading-snug truncate">
+                    {feedback.answer
+                      ? `Answer: ${feedback.answer}`
+                      : 'Review the matches above.'}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleContinue}
+                className="shrink-0 px-8 py-3 rounded-full text-base font-bold text-white shadow"
+                style={{ backgroundColor: feedback.ok ? '#22c55e' : '#ef4444' }}
+              >
+                Continue
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* No-hearts modal */}
       <AnimatePresence>
