@@ -1,10 +1,15 @@
-# Warli Speech Translator
+# Warli Seekho — Translator + Learning App
 
-A full-stack web app that translates **typed or spoken English / Hindi / Marathi**
-into **Warli** (Varli) — an Indo-Aryan, Marathi-family tribal language of the
-Maharashtra/Gujarat region — rendered here in Devanagari, with optional spoken output.
+Two apps, one server, one origin:
 
-**One server, one origin.** A single Docker image (root `Dockerfile`) builds the React
+1. **Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
+   (Varli, Devanagari) text, with optional spoken output.
+2. **Learning app** — a gamified Warli course (12 lessons in 4 units, 61
+   exercises, trilingual EN/HI/MR instruction), a searchable **wordbook** over
+   the full 2,178-word dictionary with tap-to-hear pronunciation, and a
+   **teacher dashboard** with class analytics.
+
+A single Docker image (root `Dockerfile`) builds the React
 app and runs the FastAPI backend, which serves the JSON API under `/api` **and** the UI
 at `/`. There is no separate frontend host and no cross-origin CORS hop.
 
@@ -65,9 +70,9 @@ warliiii/
 │       ├── __init__.py
 │       ├── main.py               # entrypoint: mounts /api routes AND serves frontend/dist at /
 │       ├── config.py             # settings + feature flags + paths (incl. api_prefix, frontend_dist)
-│       ├── api/       (__init__.py, routes.py, errors.py)
-│       ├── models/    (__init__.py, schemas.py)
-│       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py)
+│       ├── api/       (__init__.py, routes.py, learning_routes.py, errors.py)
+│       ├── models/    (__init__.py, schemas.py, learning_schemas.py)
+│       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py, learning_service.py)
 │
 ├── frontend/                     ← React + Vite SPA (built into dist/, then served by FastAPI)
 │   ├── index.html
@@ -75,16 +80,22 @@ warliiii/
 │   ├── vite.config.js
 │   ├── .env.example / .gitignore
 │   └── src/
-│       ├── main.jsx              # React entrypoint (mounts <TranslatePage/>)
-│       ├── index.css             # the entire design system / theming
-│       ├── api/        (client.js)
-│       ├── pages/      (TranslatePage.jsx — includes the segmented toggles)
-│       └── components/ (Recorder, ResultPanel [incl. the audio player], WarliArt)
+│       ├── main.jsx              # React entrypoint + routes (/, /lesson/:id, /words, /teacher, /translate)
+│       ├── index.css             # the entire design system / theming (+ Tailwind)
+│       ├── api/        (client.js, learning.js)
+│       ├── context/    (ProgressContext.jsx — stars/streak/hearts/language, localStorage)
+│       ├── components/ (Recorder, ResultPanel [incl. the audio player], WarliArt)
+│       ├── components/learn/ (LearningMap, LessonNode, ExerciseCard, MultipleChoice,
+│       │                      MatchPairs, ListenType, AnswerCard [Guru Card], MascotHint,
+│       │                      ProgressBar, HeartIndicator, XpBurst, LanguageSwitcher)
+│       ├── components/layout/ (Navbar, GameHeader)
+│       └── pages/      (LearnPage, LessonPlayer, WordsPage, TeacherDashboard, TranslatePage)
 │
 └── data/                         ← runtime data assets (read from disk; nothing hardcoded)
     ├── warli_dictionary/    (warli_dictionary.json, grammar_rules.json, README.md)
     ├── voice_recording/     (corrections.json, README.md)
     ├── pronunciation_audio/ (lexicon.json, transcriptions.csv, sources.md, README.md, clips/)
+    ├── pedagogy/            (curriculum.json, mock_classroom.json, lessons/lesson_001…012.json)
     └── research_papers/     (README.md — drop reference PDFs here)
 ```
 
@@ -263,6 +274,47 @@ The UI is served at `GET /`; every JSON endpoint lives under `/api`.
 `source_lang` accepts `en`, `hi`, `mr`, or `auto`. Errors always return
 `{ "error": "<code>", "detail": "<message>" }` with a proper HTTP status (e.g. `415`
 unsupported audio format, `413` too large, `422` validation, `400` no speech detected).
+
+### Learning endpoints (`/api/learning/*`)
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/learning/path` | full curriculum (4 units, 12 lessons) with inlined summaries |
+| `GET` | `/api/learning/lesson/{id}` | one lesson with all exercises (incl. trilingual prompts + tips) |
+| `POST` | `/api/learning/hint` | `{prompt_en, correct_answer, source_lang}` → child-friendly hint (never 5xx) |
+| `GET` | `/api/learning/pronounce?word=` | single Warli word → base64 MP3 (same approximation notice as TTS) |
+| `GET` | `/api/learning/classroom` | mock classroom data + avg XP for the teacher dashboard |
+
+---
+
+## Learning app (Warli Seekho)
+
+The course lives in `data/pedagogy/`: `curriculum.json` (units → lesson IDs) plus one
+file per lesson under `lessons/`. v2 ships **12 lessons in 4 units, 61 exercises**:
+
+| Unit | Lessons |
+|---|---|
+| First Words | Greetings · Numbers 1-5 · You & Me |
+| The World Around Us | Body Parts · Animals · Nature |
+| Daily Life | Colours · Food & Water · Family |
+| Speak Warli | Actions · First Sentences · Daily Phrases |
+
+Every lesson carries **trilingual instruction** (`prompt_en` / `prompt_hi` / `prompt_mr`,
+switchable in the navbar, persisted in localStorage), and sentence lessons carry
+**grammar tips** (`tip_en/hi/mr`, e.g. the SOV verb-last rule). Exercise types:
+`multiple_choice` (listen-and-choose, auto-playing audio), `match_pairs`
+(tap-to-match), `listen_type` (listen-and-type). Answers open an original
+Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and an
+exit (✕) back to the map — a wrong answer can never strand the learner.
+
+Beyond lessons: **`/words`** is a searchable wordbook over the entire 2,178-word
+dictionary (tap 🔊 to hear any word), and **`/teacher`** is a classroom dashboard
+(KPIs, score chart, struggle areas, student table) fed by `mock_classroom.json`.
+Progress (stars, streak, hearts, completed lessons, language) persists in
+localStorage; hearts/streak roll over daily.
+
+To add a lesson: drop `lessons/lesson_013.json` (same schema), list it in
+`curriculum.json`, then `POST /api/admin/reload` — no code change, no restart.
 
 ---
 

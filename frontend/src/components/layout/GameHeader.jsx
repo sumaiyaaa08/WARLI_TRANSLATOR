@@ -1,7 +1,8 @@
-// GameHeader.jsx — Duolingo-style status bar (streak, XP, hearts).
+// GameHeader.jsx — Status bar: day streak, star balance, heart meter.
 // Reads live gamification state from ProgressContext.
 
 import { useProgress } from '../../context/ProgressContext'
+import HeartIndicator from '../learn/HeartIndicator'
 
 export default function GameHeader() {
   const { xp, streak, hearts } = useProgress()
@@ -22,17 +23,12 @@ export default function GameHeader() {
       <span
         className="text-sm font-bold"
         style={{ color: '#f97316' }}
-        title="Total XP"
+        title="Star balance"
       >
-        ⚡ {xp} XP
+        ★ {xp}
       </span>
-      <span
-        className="text-sm font-bold"
-        style={{ color: hearts > 0 ? '#ef4444' : '#a8a29e' }}
-        title="Hearts remaining"
-        aria-live="polite"
-      >
-        ❤️ {hearts}/5
+      <span aria-live="polite">
+        <HeartIndicator hearts={hearts} />
       </span>
     </header>
   )
