@@ -1,10 +1,12 @@
-// LearningMap.jsx — Vertical scrolling learning roadmap.
-// Renders unit section headers with sticky positioning.
-// Draws LessonNode components connected by vertical SVG lines.
-// Computes lesson lock/unlock status based on completedLessons.
+// LearningMap.jsx — The journey trail through Warli country.
+// An ORIGINAL Warli Seekho design: each unit opens with a terracotta mural
+// banner (white dance-chain divider), then its lessons wind down a dashed
+// village trail as cards alternating left/right — not a row of circles.
 
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import LessonNode from './LessonNode'
+import { WarliDivider } from '../WarliArt'
 import { useProgress } from '../../context/ProgressContext'
 
 export default function LearningMap({ units, completedLessons }) {
@@ -31,78 +33,87 @@ export default function LearningMap({ units, completedLessons }) {
     }
   }
 
-  const unitIcons = { wave: '👋', sun: '☀️', home: '🏠', star: '⭐' }
+  function unitTitle(unit) {
+    return uiLang === 'mr'
+      ? (unit.title_mr || unit.title_hi)
+      : uiLang === 'en'
+        ? unit.title_en
+        : unit.title_hi
+  }
 
   return (
-    <div className="w-full max-w-md mx-auto pb-12">
-      {units.map((unit, unitIdx) => (
-        <div key={unit.id} className="mb-6">
-          {/* Sticky unit heading */}
-          <div className="sticky top-[56px] z-30 bg-[#fef9f0]/90 backdrop-blur-sm py-2 px-4 border-b border-stone-100 mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl" aria-hidden="true">
-                {unitIcons[unit.icon] || '📚'}
-              </span>
-              <div>
-                <p className="font-bold text-[#1c1917] leading-tight" style={{ fontFamily: '"Baloo 2", system-ui, sans-serif' }}>
-                  {uiLang === 'mr' ? (unit.title_mr || unit.title_hi) : uiLang === 'en' ? unit.title_en : unit.title_hi}
-                </p>
-                <p className="text-xs text-[#78716c]">{unit.title_en}</p>
+    <div className="w-full max-w-md mx-auto pb-12 px-4">
+      {units.map((unit) => {
+        const done = unit.lessons.filter(l => completedLessons.includes(l.id)).length
+        const total = unit.lessons.length
+
+        return (
+          <section key={unit.id} className="mb-8">
+            {/* ── Mural banner ─────────────────────────────────────────── */}
+            <motion.div
+              className="rounded-3xl px-5 pt-4 pb-5 shadow-md relative overflow-hidden"
+              style={{ backgroundColor: '#c2571b' }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.35 }}
+            >
+              <div style={{ color: '#fdf5ea' }}>
+                <WarliDivider />
               </div>
-            </div>
-          </div>
-
-          {/* Lesson nodes connected by vertical SVG lines */}
-          <div className="flex flex-col items-center gap-0">
-            {unit.lessons.map((lesson, lessonIdx) => {
-              const status = getLessonStatus(lesson.id)
-              const isLast = lessonIdx === unit.lessons.length - 1
-
-              return (
-                <div key={lesson.id} className="flex flex-col items-center">
-                  <LessonNode
-                    lesson={lesson}
-                    status={status}
-                    onClick={() => handleNodeClick(lesson.id, status)}
-                  />
-                  {/* Connector line to next node */}
-                  {!isLast && (
-                    <svg
-                      width="4"
-                      height="32"
-                      viewBox="0 0 4 32"
-                      aria-hidden="true"
-                      className="my-1"
-                    >
-                      <line
-                        x1="2" y1="0" x2="2" y2="32"
-                        stroke="#e7e5e4"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+              <div className="flex items-end justify-between gap-3 mt-1">
+                <div className="min-w-0">
+                  <h2
+                    className="text-2xl font-bold leading-tight"
+                    style={{ color: '#fdf5ea', fontFamily: '"Baloo 2", system-ui, sans-serif' }}
+                  >
+                    {unitTitle(unit)}
+                  </h2>
+                  {uiLang !== 'en' && (
+                    <p className="text-xs font-semibold" style={{ color: 'rgba(253,245,234,0.75)' }}>
+                      {unit.title_en}
+                    </p>
                   )}
                 </div>
-              )
-            })}
-          </div>
+                <span
+                  className="shrink-0 rounded-full px-3 py-1 text-xs font-bold"
+                  style={{ backgroundColor: '#fdf5ea', color: '#9a3412' }}
+                  aria-label={`${done} of ${total} lessons done`}
+                >
+                  {done === total ? `✓ ${done}/${total}` : `${done}/${total}`}
+                </span>
+              </div>
+            </motion.div>
 
-          {/* Connector line between units */}
-          {unitIdx < units.length - 1 && (
-            <div className="flex justify-center mt-2 mb-2">
-              <svg width="4" height="24" viewBox="0 0 4 24" aria-hidden="true">
-                <line
-                  x1="2" y1="0" x2="2" y2="24"
-                  stroke="#d6d3d1"
-                  strokeWidth="4"
-                  strokeDasharray="4 4"
-                  strokeLinecap="round"
-                />
-              </svg>
+            {/* ── Winding trail of lesson cards ────────────────────────── */}
+            <div className="relative flex flex-col gap-4 mt-4 mb-2 px-1">
+              {/* dashed centre trail */}
+              <div
+                className="absolute top-2 bottom-2 left-1/2 -translate-x-1/2 border-l-2 border-dashed"
+                style={{ borderColor: '#d8c3b2' }}
+                aria-hidden="true"
+              />
+              {unit.lessons.map((lesson, lessonIdx) => {
+                const status = getLessonStatus(lesson.id)
+                const leftSide = lessonIdx % 2 === 0
+
+                return (
+                  <div
+                    key={lesson.id}
+                    className={`relative z-10 w-[84%] ${leftSide ? 'self-start' : 'self-end'}`}
+                  >
+                    <LessonNode
+                      lesson={lesson}
+                      status={status}
+                      onClick={() => handleNodeClick(lesson.id, status)}
+                    />
+                  </div>
+                )
+              })}
             </div>
-          )}
-        </div>
-      ))}
+          </section>
+        )
+      })}
     </div>
   )
 }

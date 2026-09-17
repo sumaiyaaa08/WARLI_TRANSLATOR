@@ -29,6 +29,10 @@ class Exercise(BaseModel):
     options: Optional[List[str]] = None
     pairs: Optional[List[dict]] = None
     correct: str
+    # Optional grammar/vocab tip shown above the exercise (SOV rule etc.).
+    tip_en: Optional[str] = None
+    tip_hi: Optional[str] = None
+    tip_mr: Optional[str] = None
 
 
 # ── Lesson ──────────────────────────────────────────────────────────────────

@@ -81,13 +81,6 @@ export default function MultipleChoice({ exercise, onCorrect, onWrong }) {
     }
   }
 
-  function getOptionStyle(opt) {
-    if (!revealed) return { border: '2px solid #e7e5e4', background: 'white' }
-    if (opt === exercise.correct) return { border: '2px solid #22c55e', background: '#f0fdf4' }
-    if (opt === selected) return { border: '2px solid #ef4444', background: '#fef2f2' }
-    return { border: '2px solid #e7e5e4', background: 'white', opacity: 0.6 }
-  }
-
   return (
     <div className="w-full">
       {/* Audio button — only shown when audio loaded successfully */}
@@ -109,34 +102,54 @@ export default function MultipleChoice({ exercise, onCorrect, onWrong }) {
         </div>
       )}
 
-      {/* Options grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {options.map(opt => {
-          const isCorrect = opt === exercise.correct
-          const isSelected = opt === selected
+      {/* Options: single column when options are full sentences, else 2-col grid */}
+      <OptionsGrid options={options} revealed={revealed} selected={selected}
+        exercise={exercise} onSelect={handleSelect} />
+    </div>
+  )
+}
 
-          return (
-            <motion.button
-              key={opt}
-              className="rounded-2xl p-4 text-lg font-semibold text-center min-h-[56px] transition-colors"
-              style={getOptionStyle(opt)}
-              onClick={() => handleSelect(opt)}
-              disabled={revealed}
-              animate={
-                revealed && isSelected && !isCorrect
-                  ? { x: [0, -8, 8, -8, 0] }
-                  : revealed && isSelected && isCorrect
-                  ? { scale: [1, 1.12, 1] }
-                  : {}
-              }
-              transition={{ duration: 0.4 }}
-              aria-pressed={isSelected}
-            >
-              {opt}
-            </motion.button>
-          )
-        })}
-      </div>
+// ── Adaptive options grid ───────────────────────────────────────────────────
+// Short words (माझं, पाणी) sit in a compact 2-column grid; full Warli
+// sentences (मी भात खातो) get roomy single-column rows.
+
+function OptionsGrid({ options, revealed, selected, exercise, onSelect }) {
+  const long = options.some(o => (o || '').length > 14)
+
+  function getOptionStyle(opt) {
+    if (!revealed) return { border: '2px solid #e7e5e4', background: 'white' }
+    if (opt === exercise.correct) return { border: '2px solid #22c55e', background: '#f0fdf4' }
+    if (opt === selected) return { border: '2px solid #ef4444', background: '#fef2f2' }
+    return { border: '2px solid #e7e5e4', background: 'white', opacity: 0.6 }
+  }
+
+  return (
+    <div className={long ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3'}>
+      {options.map(opt => {
+        const isCorrect = opt === exercise.correct
+        const isSelected = opt === selected
+
+        return (
+          <motion.button
+            key={opt}
+            className={`rounded-2xl p-4 font-semibold text-center min-h-[56px] transition-colors ${long ? 'text-lg' : 'text-lg'}`}
+            style={getOptionStyle(opt)}
+            onClick={() => onSelect(opt)}
+            disabled={revealed}
+            animate={
+              revealed && isSelected && !isCorrect
+                ? { x: [0, -8, 8, -8, 0] }
+                : revealed && isSelected && isCorrect
+                ? { scale: [1, 1.12, 1] }
+                : {}
+            }
+            transition={{ duration: 0.4 }}
+            aria-pressed={isSelected}
+          >
+            {opt}
+          </motion.button>
+        )
+      })}
     </div>
   )
 }

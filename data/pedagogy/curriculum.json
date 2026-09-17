@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "units": [
     {
       "id": "unit_001",
@@ -7,7 +7,7 @@
       "title_hi": "पहले शब्द",
       "title_mr": "पहिले शब्द",
       "icon": "wave",
-      "lessons": ["lesson_001", "lesson_002"]
+      "lessons": ["lesson_001", "lesson_002", "lesson_007"]
     },
     {
       "id": "unit_002",
@@ -15,7 +15,7 @@
       "title_hi": "हमारी दुनिया",
       "title_mr": "आपलं जग",
       "icon": "sun",
-      "lessons": ["lesson_003", "lesson_004"]
+      "lessons": ["lesson_003", "lesson_004", "lesson_008"]
     },
     {
       "id": "unit_003",
@@ -23,7 +23,15 @@
       "title_hi": "रोज़ की ज़िंदगी",
       "title_mr": "रोजचं जीवन",
       "icon": "home",
-      "lessons": ["lesson_005", "lesson_006"]
+      "lessons": ["lesson_005", "lesson_006", "lesson_009"]
+    },
+    {
+      "id": "unit_004",
+      "title_en": "Speak Warli",
+      "title_hi": "वारली बोलो",
+      "title_mr": "वारली बोला",
+      "icon": "star",
+      "lessons": ["lesson_010", "lesson_011", "lesson_012"]
     }
   ]
 }

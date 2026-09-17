@@ -31,7 +31,7 @@ export default function Navbar() {
       </Link>
 
       {/* Centre nav links */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link
           to="/"
           className="text-sm font-semibold no-underline transition-colors"
@@ -40,6 +40,15 @@ export default function Navbar() {
           }}
         >
           Learn
+        </Link>
+        <Link
+          to="/words"
+          className="text-sm font-semibold no-underline transition-colors"
+          style={{
+            color: location.pathname === '/words' ? '#f97316' : '#78716c',
+          }}
+        >
+          Words
         </Link>
         <Link
           to="/translate"

@@ -13,6 +13,12 @@
     { "lesson_id": "lesson_003", "avg_score_pct": 52, "attempts": 8, "struggle_exercise_ids": ["ex_003_02", "ex_003_04"] },
     { "lesson_id": "lesson_004", "avg_score_pct": 65, "attempts": 6, "struggle_exercise_ids": [] },
     { "lesson_id": "lesson_005", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
-    { "lesson_id": "lesson_006", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] }
+    { "lesson_id": "lesson_006", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_007", "avg_score_pct": 81, "attempts": 7, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_008", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_009", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_010", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_011", "avg_score_pct": 47, "attempts": 5, "struggle_exercise_ids": ["ex_011_01", "ex_011_05"] },
+    { "lesson_id": "lesson_012", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] }
   ]
 }

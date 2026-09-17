@@ -67,6 +67,13 @@ export default function LessonPlayer() {
 
   const exercises = lesson?.exercises || []
   const exercise = exercises[currentIdx]
+  const lessonTitle = lesson
+    ? (uiLang === 'mr'
+        ? (lesson.title_mr || lesson.title_hi)
+        : uiLang === 'en'
+          ? lesson.title_en
+          : lesson.title_hi)
+    : ''
 
   function handleCorrect() {
     if (!lesson || feedback) return
@@ -169,6 +176,19 @@ export default function LessonPlayer() {
         <div className="flex-1">
           <ProgressBar current={currentIdx} total={exercises.length} />
         </div>
+      </div>
+
+      {/* Lesson title + question counter */}
+      <div className="w-full max-w-lg mx-auto px-4 pt-2 pb-1 flex items-baseline justify-between gap-2">
+        <h1
+          className="text-lg font-bold truncate"
+          style={{ color: '#1c1917', fontFamily: '"Baloo 2", system-ui, sans-serif' }}
+        >
+          {lessonTitle}
+        </h1>
+        <span className="shrink-0 text-xs font-bold" style={{ color: '#a8a29e' }}>
+          {exercises.length > 0 ? `${currentIdx + 1} / ${exercises.length}` : ''}
+        </span>
       </div>
 
       <main className="flex-1 overflow-y-auto pb-32">

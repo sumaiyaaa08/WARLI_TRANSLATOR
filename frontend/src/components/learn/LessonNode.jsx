@@ -1,111 +1,89 @@
-// LessonNode.jsx — A single circular node on the Learning Map.
-// Status: 'locked' (grey), 'unlocked' (orange, interactive), 'completed' (green + checkmark).
-// Shows a completion ripple animation when status becomes 'completed'.
+// LessonNode.jsx — One lesson card on the journey trail.
+// Status: 'locked' (stone, no entry), 'unlocked' (terracotta, inviting),
+// 'completed' (leaf-green seal). Shows the lesson title in the learner's
+// language, the English subtitle, and the star reward.
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircle } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useProgress } from '../../context/ProgressContext'
+
+const MEDALLIONS = {
+  locked: { icon: '🔒', bg: '#e7e5e4', fg: '#a8a29e' },
+  unlocked: { icon: '▶', bg: '#c2571b', fg: '#fdf5ea' },
+  completed: { icon: '✓', bg: '#22c55e', fg: '#ffffff' },
+}
 
 export default function LessonNode({ lesson, status, onClick }) {
   const { uiLang } = useProgress()
-  const displayTitle = uiLang === 'mr' ? (lesson.title_mr || lesson.title_hi) : uiLang === 'en' ? lesson.title_en : lesson.title_hi
-  const [showRipple, setShowRipple] = useState(false)
-  const prevStatusRef = useRef(status)
+  const displayTitle =
+    uiLang === 'mr'
+      ? (lesson.title_mr || lesson.title_hi)
+      : uiLang === 'en'
+        ? lesson.title_en
+        : lesson.title_hi
 
-  // Trigger ripple when transitioning to completed
-  useEffect(() => {
-    if (prevStatusRef.current !== 'completed' && status === 'completed') {
-      setShowRipple(true)
-      const timer = setTimeout(() => setShowRipple(false), 700)
-      return () => clearTimeout(timer)
-    }
-    prevStatusRef.current = status
-  }, [status])
+  const medallion = MEDALLIONS[status] || MEDALLIONS.locked
+  const clickable = status === 'unlocked' || status === 'completed'
 
-  const handleClick = () => {
-    if (status === 'unlocked' || status === 'completed') {
-      onClick?.()
-    }
-  }
+  const edgeColor =
+    status === 'completed' ? '#22c55e' : status === 'unlocked' ? '#c2571b' : '#d6d3d1'
 
-  const baseClasses = 'relative w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold transition-all select-none'
-
-  const statusClasses = {
-    locked: 'bg-stone-300 text-stone-500 cursor-not-allowed',
-    unlocked: 'bg-[#f97316] text-white shadow-lg cursor-pointer',
-    completed: 'bg-[#22c55e] text-white cursor-pointer',
-  }
-
-  const nodeContent = {
-    locked: '🔒',
-    unlocked: displayTitle.charAt(0),
-    completed: '✓',
-  }
-
-  if (status === 'unlocked') {
-    return (
-      <div className="flex flex-col items-center">
-        <motion.button
-          className={`${baseClasses} ${statusClasses.unlocked}`}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleClick}
-          aria-label={`${lesson.title_en} — unlocked`}
-        >
-          {nodeContent.unlocked}
-        </motion.button>
-        <span className="text-xs text-stone-500 text-center mt-1 max-w-[80px] leading-tight">
-          {displayTitle}
-        </span>
-      </div>
-    )
-  }
-
-  if (status === 'completed') {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="relative">
-          <button
-            className={`${baseClasses} ${statusClasses.completed}`}
-            onClick={handleClick}
-            aria-label={`${lesson.title_en} — completed`}
-          >
-            <CheckCircle size={36} aria-hidden="true" />
-          </button>
-          {/* Completion ripple */}
-          <AnimatePresence>
-            {showRipple && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-[#22c55e] pointer-events-none"
-                initial={{ scale: 1, opacity: 0.5 }}
-                animate={{ scale: 2, opacity: 0 }}
-                exit={{}}
-                transition={{ duration: 0.6 }}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-        <span className="text-xs text-stone-500 text-center mt-1 max-w-[80px] leading-tight">
-          {displayTitle}
-        </span>
-      </div>
-    )
-  }
-
-  // Locked
   return (
-    <div className="flex flex-col items-center">
-      <div
-        className={`${baseClasses} ${statusClasses.locked}`}
-        role="img"
-        aria-label={`${lesson.title_en} — locked`}
+    <motion.button
+      onClick={() => { if (clickable) onClick?.() }}
+      disabled={!clickable}
+      className="w-full flex items-center gap-3 rounded-2xl p-3 text-left border-l-4 shadow-sm"
+      style={{
+        backgroundColor: '#ffffff',
+        borderColor: edgeColor,
+        borderTop: '1px solid #f5f5f4',
+        borderRight: '1px solid #f5f5f4',
+        borderBottom: '1px solid #f5f5f4',
+        opacity: status === 'locked' ? 0.75 : 1,
+        cursor: clickable ? 'pointer' : 'not-allowed',
+      }}
+      whileHover={clickable ? { scale: 1.02, x: 2 } : {}}
+      whileTap={clickable ? { scale: 0.98 } : {}}
+      aria-label={`${lesson.title_en} — ${status}`}
+    >
+      {/* Status medallion */}
+      <span
+        className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold"
+        style={{ backgroundColor: medallion.bg, color: medallion.fg }}
+        aria-hidden="true"
       >
-        🔒
-      </div>
-      <span className="text-xs text-stone-400 text-center mt-1 max-w-[80px] leading-tight">
-        {displayTitle}
+        {medallion.icon}
       </span>
-    </div>
+
+      {/* Titles */}
+      <span className="flex-1 min-w-0">
+        <span
+          className="block font-bold leading-tight truncate"
+          style={{
+            color: status === 'locked' ? '#a8a29e' : '#1c1917',
+            fontFamily: '"Baloo 2", system-ui, sans-serif',
+          }}
+        >
+          {displayTitle}
+        </span>
+        {uiLang !== 'en' && (
+          <span className="block text-xs truncate" style={{ color: '#a8a29e' }}>
+            {lesson.title_en}
+          </span>
+        )}
+        <span
+          className="inline-block mt-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
+          style={{ backgroundColor: '#fef3e8', color: '#c2571b' }}
+        >
+          ★ {lesson.xp_reward}
+        </span>
+      </span>
+
+      {/* Chevron for enterable lessons */}
+      {clickable && (
+        <span className="shrink-0 text-xl font-bold" style={{ color: '#d6d3d1' }} aria-hidden="true">
+          ›
+        </span>
+      )}
+    </motion.button>
   )
 }

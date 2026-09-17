@@ -1,0 +1,61 @@
+{
+  "id": "lesson_009",
+  "title_en": "Family",
+  "title_hi": "परिवार",
+  "title_mr": "कुटुंब",
+  "xp_reward": 15,
+  "exercises": [
+    {
+      "id": "ex_009_01",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'mother' in Warli?",
+      "prompt_hi": "'माता' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'आई' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "आई",
+      "options": ["आई", "आवो", "दादा", "ताई"],
+      "correct": "आई"
+    },
+    {
+      "id": "ex_009_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'father' in Warli?",
+      "prompt_hi": "'पिता' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'वडील' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "आवो",
+      "options": ["आवो", "दादा", "पोर", "मित्र"],
+      "correct": "आवो"
+    },
+    {
+      "id": "ex_009_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the family members.",
+      "prompt_hi": "परिवार के सदस्यों को मिलाएं।",
+      "prompt_mr": "कुटुंबातील सदस्य जुळवा.",
+      "pairs": [
+        { "source": "brother", "warli": "दादा" },
+        { "source": "sister", "warli": "ताई" },
+        { "source": "friend", "warli": "मित्र" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_009_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the word you hear.",
+      "prompt_hi": "सुनो और जो शब्द सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा शब्द लिहा.",
+      "audio_word": "आई",
+      "correct": "आई"
+    },
+    {
+      "id": "ex_009_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'गाव' mean?",
+      "prompt_hi": "'गाव' का अर्थ क्या है?",
+      "prompt_mr": "'गाव' चा अर्थ काय?",
+      "audio_word": "गाव",
+      "options": ["village", "city", "house", "field"],
+      "correct": "village"
+    }
+  ]
+}

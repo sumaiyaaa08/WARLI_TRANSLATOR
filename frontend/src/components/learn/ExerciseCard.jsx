@@ -15,6 +15,11 @@ export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
       ? exercise.prompt_en
       : exercise.prompt_hi
   const secondary = uiLang === 'en' ? null : exercise.prompt_en
+  const tip = uiLang === 'mr'
+    ? (exercise.tip_mr || exercise.tip_hi || exercise.tip_en)
+    : uiLang === 'hi'
+      ? (exercise.tip_hi || exercise.tip_en)
+      : exercise.tip_en
 
   function renderExercise() {
     switch (exercise.type) {
@@ -41,6 +46,17 @@ export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
         <p className="text-xl font-semibold text-stone-800 mb-1">{primary}</p>
         {secondary && <p className="text-sm text-stone-500">{secondary}</p>}
       </div>
+
+      {/* Grammar/vocab tip (only on exercises that carry one) */}
+      {tip && (
+        <div
+          className="mb-4 rounded-2xl px-4 py-3 text-sm leading-relaxed"
+          style={{ backgroundColor: '#fef3e8', border: '2px dashed #c2571b', color: '#7c2d12' }}
+          role="note"
+        >
+          <span className="font-bold">💡 </span>{tip}
+        </div>
+      )}
 
       {/* Exercise content */}
       {renderExercise()}

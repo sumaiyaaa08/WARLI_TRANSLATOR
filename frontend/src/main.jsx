@@ -7,6 +7,7 @@ import LearnPage from './pages/LearnPage'
 import LessonPlayer from './pages/LessonPlayer'
 import TeacherDashboard from './pages/TeacherDashboard'
 import TranslatePage from './pages/TranslatePage'
+import WordsPage from './pages/WordsPage'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<LearnPage />} />
           <Route path="/lesson/:lessonId" element={<LessonPlayer />} />
+          <Route path="/words" element={<WordsPage />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/translate" element={<TranslatePage />} />
         </Routes>
