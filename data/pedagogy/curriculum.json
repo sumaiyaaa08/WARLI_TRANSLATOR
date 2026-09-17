@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "units": [
     {
       "id": "unit_001",
@@ -32,6 +32,14 @@
       "title_mr": "वारली बोला",
       "icon": "star",
       "lessons": ["lesson_010", "lesson_011", "lesson_012"]
+    },
+    {
+      "id": "unit_005",
+      "title_en": "Village Life",
+      "title_hi": "गाँव का जीवन",
+      "title_mr": "गावचं जीवन",
+      "icon": "drum",
+      "lessons": ["lesson_013", "lesson_014", "lesson_015"]
     }
   ]
 }

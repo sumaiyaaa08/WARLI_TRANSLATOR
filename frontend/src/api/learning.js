@@ -100,3 +100,37 @@ export async function getClassroom() {
   const res = await fetch(joinUrl('/learning/classroom'))
   return handle(res)
 }
+
+// ── Accounts + progress sync ────────────────────────────────────────────────
+
+function authHeaders(token) {
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+}
+
+/**
+ * GET /api/auth/progress — fetch the account's synced progress.
+ */
+export async function getServerProgress(token) {
+  const res = await fetch(joinUrl('/auth/progress'), { headers: { Authorization: `Bearer ${token}` } })
+  return handle(res)
+}
+
+/**
+ * POST /api/auth/progress — save progress to the account.
+ */
+export async function saveServerProgress(token, payload) {
+  const res = await fetch(joinUrl('/auth/progress'), {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(payload),
+  })
+  return handle(res)
+}
+
+/**
+ * GET /api/auth/students — public roster of registered learners (teacher view).
+ */
+export async function getStudents() {
+  const res = await fetch(joinUrl('/auth/students'))
+  return handle(res)
+}

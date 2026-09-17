@@ -5,7 +5,14 @@ import { useProgress } from '../../context/ProgressContext'
 import HeartIndicator from '../learn/HeartIndicator'
 
 export default function GameHeader() {
-  const { xp, streak, hearts } = useProgress()
+  const { xp, streak, hearts, syncStatus } = useProgress()
+
+  const syncDot = {
+    local: { bg: '#d6d3d1', label: 'Progress saved on this device only — log in to sync' },
+    syncing: { bg: '#f59e0b', label: 'Syncing progress…' },
+    synced: { bg: '#22c55e', label: 'Progress synced to your account' },
+    error: { bg: '#ef4444', label: 'Sync failed — will retry' },
+  }[syncStatus] || { bg: '#d6d3d1', label: 'Local progress' }
 
   return (
     <header
@@ -30,6 +37,12 @@ export default function GameHeader() {
       <span aria-live="polite">
         <HeartIndicator hearts={hearts} />
       </span>
+      <span
+        className="w-2.5 h-2.5 rounded-full"
+        style={{ backgroundColor: syncDot.bg }}
+        title={syncDot.label}
+        aria-label={syncDot.label}
+      />
     </header>
   )
 }

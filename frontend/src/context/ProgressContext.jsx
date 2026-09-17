@@ -1,7 +1,11 @@
 // ProgressContext.jsx — Global gamification state (XP, streak, hearts, progress)
 // Persisted in localStorage under the key "warli_progress".
+// When logged in (see AuthContext), progress ALSO syncs to the server account:
+// pull-on-login keeps the stronger record, then every change pushes (debounced).
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useAuth } from './AuthContext'
+import { getServerProgress, saveServerProgress } from '../api/learning'
 
 const STORAGE_KEY = 'warli_progress'
 
@@ -45,6 +49,7 @@ function yesterdayUTC() {
 
 const ProgressContext = createContext({
   ...DEFAULT_STATE,
+  syncStatus: 'local', // 'local' | 'syncing' | 'synced' | 'error'
   addXp: (_amount) => {},
   loseHeart: () => {},
   resetHearts: () => {},
@@ -56,7 +61,11 @@ const ProgressContext = createContext({
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export function ProgressProvider({ children }) {
+  const { token } = useAuth()
   const [state, setState] = useState(loadFromStorage)
+  const [syncStatus, setSyncStatus] = useState('local')
+  const lastPushedRef = useRef(null)   // JSON snapshot of last server-confirmed state
+  const pulledTokenRef = useRef(null)  // token already pulled for (prevents re-pull loops)
 
   // Persist every state change to localStorage.
   useEffect(() => {
@@ -72,6 +81,74 @@ export function ProgressProvider({ children }) {
     checkDayRollover()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // ── Cloud sync ────────────────────────────────────────────────────────────
+
+  /** The exact fields the server stores (excludes sync bookkeeping). */
+  function snapshot(s) {
+    return {
+      xp: s.xp,
+      streak: s.streak,
+      hearts: s.hearts,
+      completed_lessons: s.completedLessons,
+      uiLang: s.uiLang,
+      lastPlayedDate: s.lastPlayedDate,
+    }
+  }
+
+  // Pull once per login: keep whichever record learned MORE (more lessons,
+  // tie-break on XP). The loser is overwritten on the next push.
+  useEffect(() => {
+    if (!token) {
+      pulledTokenRef.current = null
+      setSyncStatus('local')
+      return
+    }
+    if (pulledTokenRef.current === token) return
+    pulledTokenRef.current = token
+    setSyncStatus('syncing')
+    getServerProgress(token)
+      .then(server => {
+        setState(prev => {
+          const sCount = (server.completed_lessons || []).length
+          const pCount = (prev.completedLessons || []).length
+          const serverWins =
+            sCount > pCount || (sCount === pCount && (server.xp || 0) > prev.xp)
+          const merged = serverWins
+            ? {
+                ...prev,
+                xp: server.xp ?? prev.xp,
+                streak: server.streak ?? prev.streak,
+                hearts: server.hearts ?? prev.hearts,
+                completedLessons: server.completed_lessons ?? prev.completedLessons,
+                uiLang: ['en', 'hi', 'mr'].includes(server.uiLang) ? server.uiLang : prev.uiLang,
+                lastPlayedDate: server.lastPlayedDate ?? prev.lastPlayedDate,
+              }
+            : prev
+          lastPushedRef.current = JSON.stringify(snapshot(merged))
+          return merged
+        })
+        setSyncStatus('synced')
+      })
+      .catch(() => setSyncStatus('error'))
+  }, [token])
+
+  // Push every change (debounced) while logged in.
+  useEffect(() => {
+    if (!token) return
+    const snap = JSON.stringify(snapshot(state))
+    if (lastPushedRef.current === snap) return  // already on the server (or just pulled)
+    setSyncStatus('syncing')
+    const timer = setTimeout(() => {
+      saveServerProgress(token, { ...JSON.parse(snap), updated_at: new Date().toISOString() })
+        .then(() => {
+          lastPushedRef.current = snap
+          setSyncStatus('synced')
+        })
+        .catch(() => setSyncStatus('error'))
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [state, token])
 
   // ── Day rollover ────────────────────────────────────────────────────────────
 
@@ -146,6 +223,7 @@ export function ProgressProvider({ children }) {
     lastPlayedDate: state.lastPlayedDate,
     completedLessons: state.completedLessons,
     uiLang: state.uiLang || 'hi',
+    syncStatus,
     addXp,
     loseHeart,
     resetHearts,

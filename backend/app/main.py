@@ -57,6 +57,8 @@ register_error_handlers(app)
 app.include_router(router, prefix=settings.api_prefix, tags=["warli"])
 from .api.learning_routes import learning_router
 app.include_router(learning_router, prefix=settings.api_prefix, tags=["learning"])
+from .api.auth_routes import auth_router
+app.include_router(auth_router, prefix=settings.api_prefix, tags=["auth"])
 
 
 @asynccontextmanager

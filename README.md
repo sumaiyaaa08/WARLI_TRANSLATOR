@@ -4,9 +4,10 @@ Two apps, one server, one origin:
 
 1. **Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
    (Varli, Devanagari) text, with optional spoken output.
-2. **Learning app** — a gamified Warli course (12 lessons in 4 units, 61
-   exercises, trilingual EN/HI/MR instruction), a searchable **wordbook** over
-   the full 2,178-word dictionary with tap-to-hear pronunciation, and a
+2. **Learning app** — a gamified Warli course (15 lessons in 5 units, 76
+   exercises, trilingual EN/HI/MR instruction), learner **accounts** with cloud
+   progress sync, a searchable **wordbook** over
+   the full 2,203-word dictionary with tap-to-hear pronunciation, and a
    **teacher dashboard** with class analytics.
 
 A single Docker image (root `Dockerfile`) builds the React
@@ -70,9 +71,9 @@ warliiii/
 │       ├── __init__.py
 │       ├── main.py               # entrypoint: mounts /api routes AND serves frontend/dist at /
 │       ├── config.py             # settings + feature flags + paths (incl. api_prefix, frontend_dist)
-│       ├── api/       (__init__.py, routes.py, learning_routes.py, errors.py)
-│       ├── models/    (__init__.py, schemas.py, learning_schemas.py)
-│       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py, learning_service.py)
+│       ├── api/       (__init__.py, routes.py, learning_routes.py, auth_routes.py, errors.py)
+│       ├── models/    (__init__.py, schemas.py, learning_schemas.py, auth_schemas.py)
+│       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py, learning_service.py, auth_service.py)
 │
 ├── frontend/                     ← React + Vite SPA (built into dist/, then served by FastAPI)
 │   ├── index.html
@@ -83,24 +84,24 @@ warliiii/
 │       ├── main.jsx              # React entrypoint + routes (/, /lesson/:id, /words, /teacher, /translate)
 │       ├── index.css             # the entire design system / theming (+ Tailwind)
 │       ├── api/        (client.js, learning.js)
-│       ├── context/    (ProgressContext.jsx — stars/streak/hearts/language, localStorage)
+│       ├── context/    (AuthContext.jsx — session; ProgressContext.jsx — stars/streak/hearts/language + cloud sync)
 │       ├── components/ (Recorder, ResultPanel [incl. the audio player], WarliArt)
 │       ├── components/learn/ (LearningMap, LessonNode, ExerciseCard, MultipleChoice,
 │       │                      MatchPairs, ListenType, AnswerCard [Guru Card], MascotHint,
 │       │                      ProgressBar, HeartIndicator, XpBurst, LanguageSwitcher)
 │       ├── components/layout/ (Navbar, GameHeader)
-│       └── pages/      (LearnPage, LessonPlayer, WordsPage, TeacherDashboard, TranslatePage)
+│       └── pages/      (LearnPage, LessonPlayer, WordsPage, LoginPage, TeacherDashboard, TranslatePage)
 │
 └── data/                         ← runtime data assets (read from disk; nothing hardcoded)
     ├── warli_dictionary/    (warli_dictionary.json, grammar_rules.json, README.md)
     ├── voice_recording/     (corrections.json, README.md)
     ├── pronunciation_audio/ (lexicon.json, transcriptions.csv, sources.md, README.md, clips/)
-    ├── pedagogy/            (curriculum.json, mock_classroom.json, lessons/lesson_001…012.json)
+    ├── pedagogy/            (curriculum.json, mock_classroom.json, lessons/lesson_001…015.json)
     └── research_papers/     (README.md — drop reference PDFs here)
 ```
 
 > All dictionary / correction / pronunciation data lives in `data/` and is read at
-> runtime. The current content is clearly-labeled **seed/example** data (~2,178
+> runtime. The current content is clearly-labeled **seed/example** data (~2,203
 > dictionary entries) so the app runs immediately; replace it with the team's real
 > researched assets.
 
@@ -152,7 +153,7 @@ warliiii/
 - **components/WarliArt.jsx** — the decorative Warli paintings as **inline SVG** (no image files): `WarliBackdrop`, `WarliBorder`, `WarliDivider`, `WarliMural`. **Edit motifs/scene here.**
 
 ### data/ — runtime assets (replace the seed data with real research)
-- **warli_dictionary/warli_dictionary.json** — English/Hindi → Warli entries (`warli`, `roman`, `en`, `hi`, `pos`, optional `example`/`tags`). The main lexicon (~2,178 seed entries). Add words here.
+- **warli_dictionary/warli_dictionary.json** — English/Hindi → Warli entries (`warli`, `roman`, `en`, `hi`, `pos`, optional `example`/`tags`). The main lexicon (~2,203 seed entries). Add words here.
 - **warli_dictionary/grammar_rules.json** — Warli word order (SOV), the postposition map, function words, and inflection/aspect cues for `en`/`hi`/`mr`. Edit translation grammar here.
 - **voice_recording/corrections.json** — wrong→correct Warli spelling pairs learned from annotated recordings; applied by the spelling corrector.
 - **pronunciation_audio/lexicon.json** — optional `word → Devanagari respelling` map used by the pronunciation layer to improve the TTS approximation.
@@ -284,13 +285,19 @@ unsupported audio format, `413` too large, `422` validation, `400` no speech det
 | `POST` | `/api/learning/hint` | `{prompt_en, correct_answer, source_lang}` → child-friendly hint (never 5xx) |
 | `GET` | `/api/learning/pronounce?word=` | single Warli word → base64 MP3 (same approximation notice as TTS) |
 | `GET` | `/api/learning/classroom` | mock classroom data + avg XP for the teacher dashboard |
+| `POST` | `/api/auth/signup` | `{username, password, display_name?}` → `{token, user}` (201; 400 if taken) |
+| `POST` | `/api/auth/login` | `{username, password}` → `{token, user}` (401 if wrong) |
+| `POST` | `/api/auth/logout` | invalidate the bearer token |
+| `GET` | `/api/auth/me` | current account + synced progress (bearer) |
+| `GET/POST` | `/api/auth/progress` | fetch / save `{xp, streak, hearts, completed_lessons, uiLang, lastPlayedDate}` (bearer) |
+| `GET` | `/api/auth/students` | public learner roster + progress for the teacher dashboard |
 
 ---
 
 ## Learning app (Warli Seekho)
 
 The course lives in `data/pedagogy/`: `curriculum.json` (units → lesson IDs) plus one
-file per lesson under `lessons/`. v2 ships **12 lessons in 4 units, 61 exercises**:
+file per lesson under `lessons/`. v3 ships **15 lessons in 5 units, 76 exercises**:
 
 | Unit | Lessons |
 |---|---|
@@ -298,6 +305,7 @@ file per lesson under `lessons/`. v2 ships **12 lessons in 4 units, 61 exercises
 | The World Around Us | Body Parts · Animals · Nature |
 | Daily Life | Colours · Food & Water · Family |
 | Speak Warli | Actions · First Sentences · Daily Phrases |
+| Village Life | Time & Days · Work & Farm · Celebration |
 
 Every lesson carries **trilingual instruction** (`prompt_en` / `prompt_hi` / `prompt_mr`,
 switchable in the navbar, persisted in localStorage), and sentence lessons carry
@@ -307,13 +315,28 @@ switchable in the navbar, persisted in localStorage), and sentence lessons carry
 Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and an
 exit (✕) back to the map — a wrong answer can never strand the learner.
 
-Beyond lessons: **`/words`** is a searchable wordbook over the entire 2,178-word
+Beyond lessons: **`/words`** is a searchable wordbook over the entire 2,203-word
 dictionary (tap 🔊 to hear any word), and **`/teacher`** is a classroom dashboard
 (KPIs, score chart, struggle areas, student table) fed by `mock_classroom.json`.
 Progress (stars, streak, hearts, completed lessons, language) persists in
 localStorage; hearts/streak roll over daily.
 
-To add a lesson: drop `lessons/lesson_013.json` (same schema), list it in
+### Learner accounts (progress tracking)
+
+Learners can **sign up / log in** (`/login`) with a username + password. While logged
+in, the app pulls the account record on login (keeping whichever side learned more)
+and pushes every change (debounced); the header dot shows grey (device-only), amber
+(syncing), green (synced) or red (failed, retries automatically). Teachers see every
+registered learner's stars, streak, lessons completed and last-active date in the
+**Registered learners (live)** panel on `/teacher`.
+
+Auth is deliberately **demo-grade**: salted pbkdf2 hashes + opaque bearer tokens in
+`data/users.json` (gitignored, never committed). Two honest limits for the report:
+(1) no rate-limiting/email recovery — swap in a real user DB for production; (2) on
+free-tier hosts **without a persistent disk, `users.json` resets on redeploy** — mount
+a disk at the data dir (or set `WARLI_USERS_FILE`) for real classes.
+
+To add a lesson: drop `lessons/lesson_016.json` (same schema), list it in
 `curriculum.json`, then `POST /api/admin/reload` — no code change, no restart.
 
 ---

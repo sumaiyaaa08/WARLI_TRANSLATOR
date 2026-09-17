@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import {
   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
-import { getClassroom } from '../api/learning'
+import { getClassroom, getStudents } from '../api/learning'
 import Navbar from '../components/layout/Navbar'
 
 export default function TeacherDashboard() {
@@ -13,6 +13,8 @@ export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [sortBy, setSortBy] = useState('xp') // 'xp' | 'name'
+  const [learners, setLearners] = useState([])
+  const [learnersError, setLearnersError] = useState(null)
 
   function fetchClassroom() {
     setLoading(true)
@@ -20,6 +22,10 @@ export default function TeacherDashboard() {
     getClassroom()
       .then(data => { setClassroom(data); setLoading(false) })
       .catch(err => { setError(err.message || 'Failed to load classroom data.'); setLoading(false) })
+    // Live registered accounts (independent of the demo-classroom fetch).
+    getStudents()
+      .then(data => { setLearners(data.students || []); setLearnersError(null) })
+      .catch(err => { setLearnersError(err.message || 'Failed to load learners.') })
   }
 
   useEffect(() => { fetchClassroom() }, [])
@@ -191,8 +197,7 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Student Table */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">          <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-stone-700">Students</h2>
             <div className="flex gap-2">
               <button
@@ -243,6 +248,61 @@ export default function TeacherDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Registered learners — LIVE accounts that signed up in the app */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 mt-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-stone-700">Registered learners (live)</h2>
+            <span
+              className="rounded-full px-2 py-0.5 text-xs font-bold"
+              style={{ backgroundColor: '#f0fdf4', color: '#15803d' }}
+            >
+              {learners.length} signed up
+            </span>
+          </div>
+          <p className="text-xs mb-3" style={{ color: '#a8a29e' }}>
+            Real accounts created via Login — progress syncs here automatically.
+          </p>
+          {learnersError && (
+            <p className="text-sm" style={{ color: '#b91c1c' }}>{learnersError}</p>
+          )}
+          {!learnersError && learners.length === 0 && (
+            <div className="rounded-xl p-3 text-center text-sm" style={{ backgroundColor: '#fff7ed', color: '#9a3412' }}>
+              No learners signed up yet — accounts appear here after first login.
+            </div>
+          )}
+          {!learnersError && learners.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-stone-100">
+                    <th className="py-2 pr-4 font-semibold text-stone-600">Learner</th>
+                    <th className="py-2 pr-4 font-semibold text-stone-600">Stars ★</th>
+                    <th className="py-2 pr-4 font-semibold text-stone-600">Streak 🔥</th>
+                    <th className="py-2 pr-4 font-semibold text-stone-600">Lessons</th>
+                    <th className="py-2 font-semibold text-stone-600">Active</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {learners.map(s => (
+                    <tr key={s.username} className="border-t border-stone-50 hover:bg-stone-50">
+                      <td className="py-2 pr-4 font-medium text-stone-800">
+                        {s.display_name}
+                        <span className="block text-xs font-normal" style={{ color: '#a8a29e' }}>@{s.username}</span>
+                      </td>
+                      <td className="py-2 pr-4 font-bold" style={{ color: '#f97316' }}>{s.xp}</td>
+                      <td className="py-2 pr-4 text-stone-600">{s.streak}</td>
+                      <td className="py-2 pr-4 text-stone-600">{s.lessons_done}/15</td>
+                      <td className="py-2 text-stone-600 text-xs">
+                        {s.last_seen ? s.last_seen.slice(0, 10) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

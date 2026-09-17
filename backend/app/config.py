@@ -119,6 +119,13 @@ class Settings:
         return self.data_dir / "pedagogy"
 
     @property
+    def users_path(self) -> Path:
+        """Accounts + progress store (gitignored). Override with WARLI_USERS_FILE."""
+        return Path(
+            os.getenv("WARLI_USERS_FILE", str(self.data_dir / "users.json"))
+        )
+
+    @property
     def frontend_dist(self) -> Path:
         """Built React app (frontend/dist). Served at "/" when present so the API
         and UI run on one origin. Override with WARLI_FRONTEND_DIST."""

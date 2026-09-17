@@ -17735,6 +17735,181 @@
       "en": "possible",
       "hi": "संभव",
       "pos": "adj"
+    },
+    {
+      "en": "mad",
+      "hi": "पागल",
+      "pos": "adj",
+      "roman": "veda",
+      "warli": "वेडा"
+    },
+    {
+      "en": "please",
+      "hi": "कृपया",
+      "pos": "interj",
+      "roman": "kripaya",
+      "warli": "कृपया"
+    },
+    {
+      "en": "fire",
+      "hi": "आग",
+      "pos": "noun",
+      "roman": "aag",
+      "warli": "आग"
+    },
+    {
+      "en": "earth",
+      "hi": "ज़मीन",
+      "pos": "noun",
+      "roman": "jameen",
+      "warli": "जमीन"
+    },
+    {
+      "en": "baby",
+      "hi": "बच्चा",
+      "pos": "noun",
+      "roman": "baal",
+      "warli": "बाळ"
+    },
+    {
+      "en": "noon",
+      "hi": "दोपहर",
+      "pos": "noun",
+      "roman": "dupaar",
+      "warli": "दुपार"
+    },
+    {
+      "en": "spring",
+      "hi": "वसंत",
+      "pos": "noun",
+      "roman": "vasant",
+      "warli": "वसंत"
+    },
+    {
+      "en": "proud",
+      "hi": "गर्वित",
+      "pos": "adj",
+      "roman": "abhimaani",
+      "warli": "अभिमानी"
+    },
+    {
+      "en": "kind",
+      "hi": "दयालु",
+      "pos": "adj",
+      "roman": "dayaalu",
+      "warli": "दयाळू"
+    },
+    {
+      "en": "left",
+      "hi": "बाईं ओर",
+      "pos": "adv",
+      "roman": "daavikade",
+      "warli": "डावीकडे"
+    },
+    {
+      "en": "pond",
+      "hi": "तालाब",
+      "pos": "noun",
+      "roman": "talam",
+      "warli": "तळं"
+    },
+    {
+      "en": "smoke",
+      "hi": "धुआँ",
+      "pos": "noun",
+      "roman": "dhoor",
+      "warli": "धूर"
+    },
+    {
+      "en": "ash",
+      "hi": "राख",
+      "pos": "noun",
+      "roman": "raakh",
+      "warli": "राख"
+    },
+    {
+      "en": "moonlight",
+      "hi": "चाँदनी",
+      "pos": "noun",
+      "roman": "chaandanam",
+      "warli": "चांदणं"
+    },
+    {
+      "en": "neighbor",
+      "hi": "पड़ोसी",
+      "pos": "noun",
+      "roman": "shejaari",
+      "warli": "शेजारी"
+    },
+    {
+      "en": "gift",
+      "hi": "उपहार",
+      "pos": "noun",
+      "roman": "bhet",
+      "warli": "भेट"
+    },
+    {
+      "en": "promise",
+      "hi": "वादा",
+      "pos": "noun",
+      "roman": "vachan",
+      "warli": "वचन"
+    },
+    {
+      "en": "eye",
+      "hi": "आँख",
+      "pos": "noun",
+      "roman": "dola",
+      "warli": "डोळा"
+    },
+    {
+      "en": "fish",
+      "hi": "मछली",
+      "pos": "noun",
+      "roman": "maasa",
+      "warli": "मासा"
+    },
+    {
+      "en": "red",
+      "hi": "लाल",
+      "pos": "adj",
+      "roman": "laal",
+      "warli": "लाल"
+    },
+    {
+      "en": "bread",
+      "hi": "रोटी",
+      "pos": "noun",
+      "roman": "bhaakar",
+      "warli": "भाकर"
+    },
+    {
+      "en": "goodbye",
+      "hi": "अलविदा",
+      "pos": "interj",
+      "roman": "nighato",
+      "warli": "निघतो"
+    },
+    {
+      "en": "come here",
+      "hi": "यहाँ आओ",
+      "pos": "sentence",
+      "roman": "ikade ye",
+      "warli": "इकडे ये"
+    },
+    {
+      "en": "is",
+      "hi": "है",
+      "pos": "cop",
+      "roman": "haay",
+      "warli": "हाय"
+    },
+    {
+      "en": "my",
+      "hi": "मेरा",
+      "pos": "pron",
+      "roman": "maajham",
+      "warli": "माझं"
     }
   ]
 }
