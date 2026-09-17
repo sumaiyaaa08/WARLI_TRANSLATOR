@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getLesson } from '../api/learning'
 import GameHeader from '../components/layout/GameHeader'
+import AnswerCard from '../components/learn/AnswerCard'
 import ExerciseCard from '../components/learn/ExerciseCard'
 import MascotHint from '../components/learn/MascotHint'
 import ProgressBar from '../components/learn/ProgressBar'
@@ -14,7 +15,7 @@ import { useProgress } from '../context/ProgressContext'
 export default function LessonPlayer() {
   const { lessonId } = useParams()
   const navigate = useNavigate()
-  const { hearts, addXp, loseHeart, completeLesson } = useProgress()
+  const { hearts, addXp, loseHeart, completeLesson, uiLang } = useProgress()
 
   const [lesson, setLesson] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -28,6 +29,9 @@ export default function LessonPlayer() {
   // Continue (in the footer) is the ONLY way forward — this guarantees the
   // lesson can never get stuck on a wrong answer.
   const [feedback, setFeedback] = useState(null)
+  // Bumped on "Try again" so the exercise remounts fresh (heart stays lost,
+  // stars can still be earned on the retry).
+  const [retryKey, setRetryKey] = useState(0)
 
   // Track if we're in the middle of a heart-loss navigation to avoid double-fire
   const navigatingRef = useRef(false)
@@ -100,6 +104,14 @@ export default function LessonPlayer() {
     }
   }
 
+  // "Try again": dismiss the card and remount the same exercise fresh.
+  // The lost heart is NOT refunded; stars remain earnable on the retry.
+  function handleRetry() {
+    if (!lesson || !feedback || feedback.ok) return
+    setFeedback(null)
+    setRetryKey(k => k + 1)
+  }
+
   function handleHintUsed() {
     setHintsRemaining(h => Math.max(0, h - 1))
   }
@@ -163,7 +175,7 @@ export default function LessonPlayer() {
         <AnimatePresence mode="wait">
           {exercise && (
             <ExerciseCard
-              key={exercise.id}
+              key={`${exercise.id}:${retryKey}`}
               exercise={exercise}
               onCorrect={handleCorrect}
               onWrong={handleWrong}
@@ -181,52 +193,20 @@ export default function LessonPlayer() {
         />
       )}
 
-      {/* Feedback footer — Duolingo-style red/green bar with Continue.
-          This is the only way to advance, so a wrong answer can never
-          leave the learner stuck. */}
+      {/* Guru Card — the village teacher's feedback after an answer.
+          Replaces the old bottom-sheet footer with an original Warli-framed
+          card. Dismissing it (Next / Try again) is the only way to advance,
+          so a wrong answer can never leave the learner stuck. */}
       <AnimatePresence>
         {feedback && !showComplete && !showNoHearts && (
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 z-40 border-t-2"
-            style={{
-              backgroundColor: feedback.ok ? '#f0fdf4' : '#fef2f2',
-              borderColor: feedback.ok ? '#22c55e' : '#ef4444',
-            }}
-            initial={{ y: 90 }}
-            animate={{ y: 0 }}
-            exit={{ y: 90 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p
-                  className="text-lg font-bold leading-tight"
-                  style={{ color: feedback.ok ? '#15803d' : '#b91c1c' }}
-                >
-                  {feedback.ok ? '🎉 Correct!' : '😕 Not quite.'}
-                </p>
-                {feedback.ok && feedback.xp > 0 && (
-                  <p className="text-sm font-bold" style={{ color: '#f97316' }}>
-                    +{feedback.xp} XP
-                  </p>
-                )}
-                {!feedback.ok && (
-                  <p className="text-base font-semibold text-stone-700 leading-snug truncate">
-                    {feedback.answer
-                      ? `Answer: ${feedback.answer}`
-                      : 'Review the matches above.'}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleContinue}
-                className="shrink-0 px-8 py-3 rounded-full text-base font-bold text-white shadow"
-                style={{ backgroundColor: feedback.ok ? '#22c55e' : '#ef4444' }}
-              >
-                Continue
-              </button>
-            </div>
-          </motion.div>
+          <AnswerCard
+            ok={feedback.ok}
+            xp={feedback.xp}
+            answer={feedback.answer}
+            uiLang={uiLang}
+            onNext={handleContinue}
+            onRetry={handleRetry}
+          />
         )}
       </AnimatePresence>
 
