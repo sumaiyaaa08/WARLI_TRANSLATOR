@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import Navbar from '../components/layout/Navbar'
 import Recorder from '../components/Recorder'
 import ResultPanel from '../components/ResultPanel'
 import { WarliBackdrop, WarliBorder, WarliDivider, WarliMural } from '../components/WarliArt'
@@ -103,6 +104,11 @@ export default function TranslatePage() {
   return (
     <>
       <WarliBackdrop />
+
+      {/* Shared nav: Learn / Words / Translate / Teacher + language switcher */}
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        <Navbar />
+      </div>
 
       <div className="app">
         <WarliBorder />
