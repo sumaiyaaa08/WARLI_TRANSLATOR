@@ -1,0 +1,61 @@
+{
+  "id": "lesson_003",
+  "title_en": "Body Parts",
+  "title_hi": "शरीर के अंग",
+  "title_mr": "शरीराचे भाग",
+  "xp_reward": 15,
+  "exercises": [
+    {
+      "id": "ex_003_01",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'hand' in Warli?",
+      "prompt_hi": "'हाथ' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'हात' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "हात",
+      "options": ["हात", "डोळा", "पाय", "कान"],
+      "correct": "हात"
+    },
+    {
+      "id": "ex_003_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'eye' in Warli?",
+      "prompt_hi": "'आँख' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'डोळा' साठी वारली शब्द कोणता?",
+      "audio_word": "डोळा",
+      "options": ["हात", "डोळा", "पाय", "तोंड"],
+      "correct": "डोळा"
+    },
+    {
+      "id": "ex_003_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the body parts.",
+      "prompt_hi": "शरीर के अंगों को मिलाएं।",
+      "prompt_mr": "शरीराचे भाग जुळवा.",
+      "pairs": [
+        { "source": "hand", "warli": "हात" },
+        { "source": "eye", "warli": "डोळा" },
+        { "source": "foot", "warli": "पाय" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_003_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the body part you hear.",
+      "prompt_hi": "सुनो और जो शरीर का अंग सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा शरीराचा भाग लिहा.",
+      "audio_word": "तोंड",
+      "correct": "तोंड"
+    },
+    {
+      "id": "ex_003_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'कान' mean?",
+      "prompt_hi": "'कान' का अर्थ क्या है?",
+      "prompt_mr": "'कान' चा अर्थ काय?",
+      "audio_word": "कान",
+      "options": ["ear", "nose", "mouth", "head"],
+      "correct": "ear"
+    }
+  ]
+}

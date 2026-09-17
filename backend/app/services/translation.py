@@ -139,6 +139,9 @@ class Dictionary:
                 else:
                     # First entry wins for a duplicate headword.
                     self._word_maps[lang].setdefault(norm, entry)
+                if lang == "en" and entry.get("pos") == "verb" and " " not in norm:
+                    for variant in self._english_verb_variants(norm):
+                        self._word_maps[lang].setdefault(variant, entry)
             # Marathi ('mr'): index an explicit 'mr' gloss when present, PLUS the
             # Warli headword itself. Warli is a Marathi-family dialect, so a spoken
             # Marathi word that equals a Warli headword resolves to that entry (its
@@ -162,6 +165,21 @@ class Dictionary:
     @staticmethod
     def _norm_key(text: str) -> str:
         return re.sub(r"\s+", " ", text.strip().lower())
+
+    @staticmethod
+    def _english_verb_variants(word: str) -> Set[str]:
+        """Return common inflected forms for an English verb headword."""
+        if not word or not re.fullmatch(r"[a-z]+", word):
+            return set()
+        variants: Set[str] = set()
+        if word.endswith("y") and len(word) > 2 and word[-2] not in "aeiou":
+            stem = word[:-1]
+            variants.update({f"{stem}ies", f"{stem}ied", f"{word}ing"})
+        elif word.endswith("e"):
+            variants.update({f"{word}s", f"{word}d", f"{word[:-1]}ing"})
+        else:
+            variants.update({f"{word}s", f"{word}es", f"{word}ed", f"{word}ing"})
+        return variants - {word}
 
     def __len__(self) -> int:
         return len(self.entries)

@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "units": [
+    {
+      "id": "unit_001",
+      "title_en": "First Words",
+      "title_hi": "पहले शब्द",
+      "title_mr": "पहिले शब्द",
+      "icon": "wave",
+      "lessons": ["lesson_001", "lesson_002"]
+    },
+    {
+      "id": "unit_002",
+      "title_en": "The World Around Us",
+      "title_hi": "हमारी दुनिया",
+      "title_mr": "आपलं जग",
+      "icon": "sun",
+      "lessons": ["lesson_003", "lesson_004"]
+    },
+    {
+      "id": "unit_003",
+      "title_en": "Daily Life",
+      "title_hi": "रोज़ की ज़िंदगी",
+      "title_mr": "रोजचं जीवन",
+      "icon": "home",
+      "lessons": ["lesson_005", "lesson_006"]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": "lesson_001",
+  "title_en": "Greetings",
+  "title_hi": "अभिवादन",
+  "title_mr": "अभिवादन",
+  "xp_reward": 10,
+  "exercises": [
+    {
+      "id": "ex_001_01",
+      "type": "multiple_choice",
+      "prompt_en": "How do you say 'hello / namaste' in Warli?",
+      "prompt_hi": "Warli में 'नमस्ते' कैसे कहते हैं?",
+      "prompt_mr": "वारलीमध्ये 'नमस्ते' कसं म्हणतात?",
+      "audio_word": "नमस्कार",
+      "options": ["नमस्कार", "पाणी", "आग", "माझं"],
+      "correct": "नमस्कार"
+    },
+    {
+      "id": "ex_001_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'come here'?",
+      "prompt_hi": "यहाँ आओ को Warli में क्या कहते हैं?",
+      "prompt_mr": "'इकडे ये' साठी वारली शब्द कोणता?",
+      "audio_word": "इकडे ये",
+      "options": ["इकडे ये", "जा", "बस", "हाय"],
+      "correct": "इकडे ये"
+    },
+    {
+      "id": "ex_001_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the Warli greetings to their meanings.",
+      "prompt_hi": "Warli अभिवादनों को उनके अर्थों से मिलाएं।",
+      "prompt_mr": "वारली अभिवादन त्यांच्या अर्थांशी जुळवा.",
+      "pairs": [
+        { "source": "Hello", "warli": "नमस्कार" },
+        { "source": "Goodbye", "warli": "निघतो" },
+        { "source": "Thank you", "warli": "धन्यवाद" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_001_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the Warli word you hear.",
+      "prompt_hi": "सुनो और जो Warli शब्द सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा वारली शब्द लिहा.",
+      "audio_word": "नमस्कार",
+      "correct": "नमस्कार"
+    },
+    {
+      "id": "ex_001_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'हाय' mean in English?",
+      "prompt_hi": "'हाय' का अर्थ क्या है?",
+      "prompt_mr": "'हाय' चा अर्थ काय?",
+      "audio_word": "हाय",
+      "options": ["is / are (to be)", "water", "fire", "go"],
+      "correct": "is / are (to be)"
+    }
+  ]
+}

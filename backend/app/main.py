@@ -18,6 +18,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
 
 from .api.errors import register_error_handlers
 from .api.routes import router
@@ -54,10 +55,12 @@ app.add_middleware(
 register_error_handlers(app)
 # All JSON endpoints live under /api (e.g. /api/translate/text, /api/health).
 app.include_router(router, prefix=settings.api_prefix, tags=["warli"])
+from .api.learning_routes import learning_router
+app.include_router(learning_router, prefix=settings.api_prefix, tags=["learning"])
 
 
-@app.on_event("startup")
-def _startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     # Build the translation engine eagerly so data-load errors surface at boot
     # (ASR/TTS models stay lazy — they are heavy and only needed on demand).
     from .services.translation import get_engine
@@ -67,6 +70,10 @@ def _startup() -> None:
         "Warli API ready. engine=%s | api_prefix=%s | data_dir=%s",
         engine.name, settings.api_prefix, settings.data_dir,
     )
+    yield
+
+
+app.router.lifespan_context = lifespan
 
 
 # Serve the built React app from the SAME process when a build is present. Mounted

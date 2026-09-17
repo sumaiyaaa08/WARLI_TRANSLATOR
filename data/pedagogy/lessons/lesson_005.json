@@ -1,0 +1,61 @@
+{
+  "id": "lesson_005",
+  "title_en": "Colours",
+  "title_hi": "रंग",
+  "title_mr": "रंग",
+  "xp_reward": 20,
+  "exercises": [
+    {
+      "id": "ex_005_01",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'red' in Warli?",
+      "prompt_hi": "'लाल' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'लाल' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "लाल",
+      "options": ["लाल", "निळा", "हिरवा", "पिवळा"],
+      "correct": "लाल"
+    },
+    {
+      "id": "ex_005_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'blue'?",
+      "prompt_hi": "'नीला' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'निळा' साठी वारली शब्द कोणता?",
+      "audio_word": "निळा",
+      "options": ["लाल", "निळा", "हिरवा", "पांढरा"],
+      "correct": "निळा"
+    },
+    {
+      "id": "ex_005_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the colours.",
+      "prompt_hi": "रंगों को मिलाएं।",
+      "prompt_mr": "रंग जुळवा.",
+      "pairs": [
+        { "source": "red", "warli": "लाल" },
+        { "source": "blue", "warli": "निळा" },
+        { "source": "green", "warli": "हिरवा" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_005_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the colour you hear.",
+      "prompt_hi": "सुनो और जो रंग सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा रंग लिहा.",
+      "audio_word": "पिवळा",
+      "correct": "पिवळा"
+    },
+    {
+      "id": "ex_005_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'पांढरा' mean?",
+      "prompt_hi": "'पांढरा' का अर्थ क्या है?",
+      "prompt_mr": "'पांढरा' चा अर्थ काय?",
+      "audio_word": "पांढरा",
+      "options": ["white", "black", "yellow", "orange"],
+      "correct": "white"
+    }
+  ]
+}

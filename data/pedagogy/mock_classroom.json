@@ -1,0 +1,18 @@
+{
+  "class_name": "Z.P. School Kasa — Class 4",
+  "students": [
+    { "id": "stu_01", "name": "Aarav", "xp": 120, "completed_lessons": ["lesson_001", "lesson_002", "lesson_003"], "streak": 5 },
+    { "id": "stu_02", "name": "Diya", "xp": 95, "completed_lessons": ["lesson_001", "lesson_002"], "streak": 3 },
+    { "id": "stu_03", "name": "Kabir", "xp": 60, "completed_lessons": ["lesson_001"], "streak": 2 },
+    { "id": "stu_04", "name": "Saanvi", "xp": 140, "completed_lessons": ["lesson_001", "lesson_002", "lesson_003", "lesson_004"], "streak": 7 },
+    { "id": "stu_05", "name": "Vivaan", "xp": 30, "completed_lessons": [], "streak": 1 }
+  ],
+  "lesson_stats": [
+    { "lesson_id": "lesson_001", "avg_score_pct": 88, "attempts": 12, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_002", "avg_score_pct": 74, "attempts": 10, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_003", "avg_score_pct": 52, "attempts": 8, "struggle_exercise_ids": ["ex_003_02", "ex_003_04"] },
+    { "lesson_id": "lesson_004", "avg_score_pct": 65, "attempts": 6, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_005", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] },
+    { "lesson_id": "lesson_006", "avg_score_pct": 0, "attempts": 0, "struggle_exercise_ids": [] }
+  ]
+}

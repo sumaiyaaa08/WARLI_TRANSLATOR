@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* Warli Speech Translator — global styles.
    Clean, flex-based layout with a single unified composer (type OR speak in one
    box, Google-Translate / Claude style). Warli art is monochrome on earthy red,

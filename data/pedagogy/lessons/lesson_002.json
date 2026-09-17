@@ -1,0 +1,62 @@
+{
+  "id": "lesson_002",
+  "title_en": "Numbers 1-5",
+  "title_hi": "संख्या १-५",
+  "title_mr": "संख्या १-५",
+  "xp_reward": 10,
+  "exercises": [
+    {
+      "id": "ex_002_01",
+      "type": "multiple_choice",
+      "prompt_en": "How do you say 'one' in Warli?",
+      "prompt_hi": "'एक' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'एक' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "एक",
+      "options": ["एक", "दोन", "तीन", "चार"],
+      "correct": "एक"
+    },
+    {
+      "id": "ex_002_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which Warli word means 'two'?",
+      "prompt_hi": "'दो' के लिए Warli शब्द कौन सा है?",
+      "prompt_mr": "'दोन' साठी वारली शब्द कोणता?",
+      "audio_word": "दोन",
+      "options": ["एक", "दोन", "पाच", "सहा"],
+      "correct": "दोन"
+    },
+    {
+      "id": "ex_002_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the numbers.",
+      "prompt_hi": "संख्याओं को मिलाएं।",
+      "prompt_mr": "संख्या जुळवा.",
+      "pairs": [
+        { "source": "1", "warli": "एक" },
+        { "source": "2", "warli": "दोन" },
+        { "source": "3", "warli": "तीन" },
+        { "source": "4", "warli": "चार" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_002_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the number you hear.",
+      "prompt_hi": "सुनो और जो संख्या सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारी संख्या लिहा.",
+      "audio_word": "पाच",
+      "correct": "पाच"
+    },
+    {
+      "id": "ex_002_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'पाच' mean?",
+      "prompt_hi": "'पाच' का अर्थ क्या है?",
+      "prompt_mr": "'पाच' चा अर्थ काय?",
+      "audio_word": "पाच",
+      "options": ["five", "four", "three", "six"],
+      "correct": "five"
+    }
+  ]
+}

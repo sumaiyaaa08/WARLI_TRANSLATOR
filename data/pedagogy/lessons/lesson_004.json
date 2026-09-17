@@ -1,0 +1,61 @@
+{
+  "id": "lesson_004",
+  "title_en": "Animals",
+  "title_hi": "जानवर",
+  "title_mr": "प्राणी",
+  "xp_reward": 15,
+  "exercises": [
+    {
+      "id": "ex_004_01",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'cow' in Warli?",
+      "prompt_hi": "'गाय' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'गाय' ला वारलीमध्ये काय म्हणतात?",
+      "audio_word": "गाय",
+      "options": ["गाय", "कुत्रा", "मासा", "पक्षी"],
+      "correct": "गाय"
+    },
+    {
+      "id": "ex_004_02",
+      "type": "multiple_choice",
+      "prompt_en": "Which word means 'dog'?",
+      "prompt_hi": "'कुत्ता' को Warli में क्या कहते हैं?",
+      "prompt_mr": "'कुत्रा' साठी वारली शब्द कोणता?",
+      "audio_word": "कुत्रा",
+      "options": ["गाय", "कुत्रा", "मासा", "साप"],
+      "correct": "कुत्रा"
+    },
+    {
+      "id": "ex_004_03",
+      "type": "match_pairs",
+      "prompt_en": "Match the animals.",
+      "prompt_hi": "जानवरों को मिलाएं।",
+      "prompt_mr": "प्राणी जुळवा.",
+      "pairs": [
+        { "source": "cow", "warli": "गाय" },
+        { "source": "dog", "warli": "कुत्रा" },
+        { "source": "fish", "warli": "मासा" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_004_04",
+      "type": "listen_type",
+      "prompt_en": "Listen and type the animal you hear.",
+      "prompt_hi": "सुनो और जो जानवर सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा प्राणी लिहा.",
+      "audio_word": "पक्षी",
+      "correct": "पक्षी"
+    },
+    {
+      "id": "ex_004_05",
+      "type": "multiple_choice",
+      "prompt_en": "What does 'साप' mean?",
+      "prompt_hi": "'साप' का अर्थ क्या है?",
+      "prompt_mr": "'साप' चा अर्थ काय?",
+      "audio_word": "साप",
+      "options": ["snake", "bird", "fish", "tiger"],
+      "correct": "snake"
+    }
+  ]
+}
