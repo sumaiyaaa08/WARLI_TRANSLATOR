@@ -55,7 +55,7 @@ class GttsWarli:
     approximation — there is no true Warli TTS model.
     """
 
-    def synthesize(self, warli_text: str) -> TTSResult:
+    def synthesize(self, warli_text: str, apply_pronunciation: bool = True) -> TTSResult:
         if not settings.tts_enabled:
             raise TTSError("TTS is disabled on this server (WARLI_TTS_ENABLED=false).")
         warli_text = (warli_text or "").strip()
@@ -70,8 +70,13 @@ class GttsWarli:
             ) from exc
 
         # 1) Optional pronunciation adjustment (decoupled; no-op if inactive).
-        layer = get_pronunciation_layer()
-        text_for_tts, changed, applied = layer.adjust(warli_text)
+        # Skipped for transliterated Santali: the Warli respelling lexicon must
+        # never rewrite another language's words.
+        if apply_pronunciation:
+            layer = get_pronunciation_layer()
+            text_for_tts, changed, applied = layer.adjust(warli_text)
+        else:
+            text_for_tts, changed, applied = warli_text, False, []
 
         # 2) Synthesize with the closest available voice.
         lang = settings.tts_voice_lang or "mr"

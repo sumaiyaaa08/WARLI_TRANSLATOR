@@ -82,20 +82,36 @@ def _result_to_response(
 
 def _maybe_synthesize(warli_text: str, output_mode: OutputMode,
                       target_lang: str = "warli"):
-    """If speech output is requested, synthesize Warli audio (approximation)."""
+    """If speech output is requested, synthesize audio.
+
+    Warli: Marathi voice reading Devanagari (approximation). Santali: Ol Chiki
+    is first transliterated to Devanagari, then read by the same voice (double
+    approximation — flagged in the note). No Santali voice model exists.
+    """
     if output_mode != OutputMode.speech or not warli_text:
         return None, None, None
     if target_lang != "warli":
-        # No Santali voice exists (Ol Chiki is unsupported by gTTS voices).
-        # Text still returns; the client is told audio is unavailable.
-        logger.info("TTS skipped: no voice for target '%s'.", target_lang)
+        from ..services.transliterate import transliterate_olchiki
+        try:
+            spoken = transliterate_olchiki(warli_text)
+            tts_result = get_tts().synthesize(spoken, apply_pronunciation=False)
+        except TTSError as exc:
+            logger.warning("Santali TTS failed: %s", exc)
+            meta = TTSMeta(
+                generated=False, approximation=True, voice_lang=None,
+                pronunciation_layer_applied=False, note=str(exc),
+            )
+            return None, None, meta
         meta = TTSMeta(
-            generated=False, approximation=True, voice_lang=None,
+            generated=True,
+            approximation=True,
+            voice_lang=tts_result.voice_lang,
             pronunciation_layer_applied=False,
-            note=(f"Speech output is unavailable for {target_lang} — no voice "
-                  "exists yet. Text translation above is unaffected."),
+            note=("Santali speech is an approximation: Ol Chiki transliterated to "
+                  "Devanagari and read by a Marathi voice — no Santali voice "
+                  "model exists."),
         )
-        return None, None, meta
+        return tts_result.audio_bytes, tts_result.mime, meta
     try:
         tts_result = get_tts().synthesize(warli_text)
     except TTSError as exc:

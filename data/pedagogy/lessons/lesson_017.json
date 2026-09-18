@@ -1,0 +1,70 @@
+{
+  "id": "lesson_017",
+  "title_en": "Around Me",
+  "title_hi": "आस-पास",
+  "title_mr": "आजूबाजूला",
+  "xp_reward": 10,
+  "exercises": [
+    {
+      "id": "ex_017_01",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "How do you say 'water' in Santali?",
+      "prompt_hi": "'पानी' को Santali में क्या कहते हैं?",
+      "prompt_mr": "'पाणी' ला संतालीमध्ये काय म्हणतात?",
+      "audio_word": "ᱫᱟᱜ",
+      "options": ["ᱫᱟᱜ", "ᱡᱚᱢᱟᱜ", "ᱟᱛᱳ", "ᱫᱤᱱ"],
+      "correct": "ᱫᱟᱜ"
+    },
+    {
+      "id": "ex_017_02",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "Which Santali word means 'village'?",
+      "prompt_hi": "'गाँव' के लिए Santali शब्द कौन सा है?",
+      "prompt_mr": "'गाव' साठी संताली शब्द कोणता?",
+      "audio_word": "ᱟᱛᱳ",
+      "options": ["ᱟᱛᱳ", "ᱢᱮᱨᱚᱢ", "ᱢᱮᱫ", "ᱥᱮᱛᱟ"],
+      "correct": "ᱟᱛᱳ"
+    },
+    {
+      "id": "ex_017_03",
+      "type": "match_pairs",
+      "target_lang": "santali",
+      "prompt_en": "Match the words around you.",
+      "prompt_hi": "आस-पास के शब्दों को मिलाएं।",
+      "prompt_mr": "आजूबाजूचे शब्द जुळवा.",
+      "pairs": [
+        { "source": "water", "warli": "ᱫᱟᱜ" },
+        { "source": "food", "warli": "ᱡᱚᱢᱟᱜ" },
+        { "source": "goat", "warli": "ᱢᱮᱨᱚᱢ" },
+        { "source": "day", "warli": "ᱫᱤᱱ" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_017_04",
+      "type": "listen_type",
+      "target_lang": "santali",
+      "prompt_en": "Listen and type the word you hear.",
+      "prompt_hi": "सुनो और जो शब्द सुनाई दे वो लिखो।",
+      "prompt_mr": "ऐका आणि ऐकू येणारा शब्द लिहा.",
+      "audio_word": "ᱫᱟᱜ",
+      "correct": "ᱫᱟᱜ"
+    },
+    {
+      "id": "ex_017_05",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "What does 'ᱢᱮᱫ' mean?",
+      "prompt_hi": "'ᱢᱮᱫ' का अर्थ क्या है?",
+      "prompt_mr": "'ᱢᱮᱫ' चा अर्थ काय?",
+      "audio_word": "ᱢᱮᱫ",
+      "options": ["eye", "ear", "nose", "hand"],
+      "correct": "eye",
+      "tip_en": "Santali is written in Ol Chiki, its own alphabet from 1925 — not Devanagari.",
+      "tip_hi": "संताली अपनी लिपि Ol Chiki में लिखी जाती है (1925) — देवनागरी में नहीं।",
+      "tip_mr": "संताली स्वतःची Ol Chiki लिपीत लिहितात (१९२५) — देवनागरीत नाही."
+    }
+  ]
+}

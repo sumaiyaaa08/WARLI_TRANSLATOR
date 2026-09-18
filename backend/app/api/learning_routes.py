@@ -65,7 +65,7 @@ def get_lesson(lesson_id: str) -> LessonDetail:
 )
 def get_hint(req: HintRequest) -> HintResponse:
     try:
-        return learning_service.get_hint(req.prompt_en, req.correct_answer)
+        return learning_service.get_hint(req.prompt_en, req.correct_answer, req.target_lang)
     except Exception as exc:
         # Never return 5xx from the hint endpoint — degrade gracefully.
         logger.warning("Hint endpoint fallback triggered: %s", exc)

@@ -37,7 +37,7 @@ export default function Navbar() {
           fontFamily: '"Baloo 2", system-ui, sans-serif',
         }}
       >
-        🎨 Warli Seekho
+        🎨 Linguify
       </Link>
 
       {/* Centre nav links */}

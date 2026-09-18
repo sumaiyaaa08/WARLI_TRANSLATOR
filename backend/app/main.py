@@ -1,4 +1,4 @@
-"""FastAPI application entrypoint for the Warli Speech Translator.
+"""FastAPI application entrypoint for Linguify (Warli + Santali translator & course).
 
 Single-server design: this one process serves BOTH the JSON API (under
 `settings.api_prefix`, default `/api`) and the built React app (from
@@ -31,7 +31,7 @@ logging.basicConfig(
 logger = logging.getLogger("warli.main")
 
 app = FastAPI(
-    title="Warli Speech Translator API",
+    title="Linguify API",
     version="1.1.0",
     description=(
         "Translate spoken/written English, Hindi or Marathi into Warli (Devanagari, "
@@ -96,7 +96,7 @@ else:
     @app.get("/", include_in_schema=False)
     def root() -> dict:
         return {
-            "service": "Warli Speech Translator API",
+            "service": "Linguify API",
             "docs": "/docs",
             "health": f"{settings.api_prefix}/health",
             "note": "No frontend build present; serving API only.",

@@ -67,11 +67,11 @@ export async function getLesson(lessonId) {
  * Body: { prompt_en, correct_answer, source_lang }
  * Returns HintResponse with child-friendly hint text.
  */
-export async function getHint({ promptEn, correctAnswer, sourceLang = 'en' }) {
+export async function getHint({ promptEn, correctAnswer, sourceLang = 'en', targetLang = 'warli' }) {
   const res = await fetch(joinUrl('/learning/hint'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt_en: promptEn, correct_answer: correctAnswer, source_lang: sourceLang }),
+    body: JSON.stringify({ prompt_en: promptEn, correct_answer: correctAnswer, source_lang: sourceLang, target_lang: targetLang }),
   })
   return handle(res)
 }

@@ -71,6 +71,7 @@ export default function MascotHint({ exercise, hintsRemaining, onUse }) {
         promptEn: exercise.prompt_en,
         correctAnswer: exercise.correct,
         sourceLang: uiLang || 'en',
+        targetLang: exercise.target_lang || 'warli',
       })
       setHint(response.hint)
       setBounceKey(k => k + 1)

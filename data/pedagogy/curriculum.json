@@ -1,6 +1,14 @@
 {
-  "version": "3.0",
+  "version": "4.0",
   "units": [
+    {
+      "id": "unit_000",
+      "title_en": "Johar! Santali",
+      "title_hi": "जोहार! संथाली",
+      "title_mr": "जोहार! संताली",
+      "icon": "drum",
+      "lessons": ["lesson_016", "lesson_017"]
+    },
     {
       "id": "unit_001",
       "title_en": "First Words",

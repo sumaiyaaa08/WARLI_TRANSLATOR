@@ -1,14 +1,15 @@
-# Warli Seekho — Translator + Learning App
+# Linguify — Translator + Learning App (Warli & Santali)
 
 Two apps, one server, one origin:
 
 1. **Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
    (Varli, Devanagari) text, with optional spoken output — or get **Santali**
    (Ol Chiki, Jharkhand) text via the seed pack (text only, no voice yet).
-2. **Learning app** — a gamified Warli course (15 lessons in 5 units, 76
-   exercises, trilingual EN/HI/MR instruction), learner **accounts** with cloud
+2. **Learning app** — a gamified course starting with **Santali first**
+   (Johar! unit) then Warli (15 Warli lessons in 5 units + 2 Santali lessons,
+   87 exercises, trilingual EN/HI/MR instruction), learner **accounts** with cloud
    progress sync, a searchable **wordbook** over
-   the full 2,203-word dictionary with tap-to-hear pronunciation, and a
+   the full dictionaries with tap-to-hear pronunciation, and a
    **teacher dashboard** with class analytics.
 
 A single Docker image (root `Dockerfile`) builds the React
@@ -298,10 +299,12 @@ unsupported audio format, `413` too large, `422` validation, `400` no speech det
 ## Learning app (Warli Seekho)
 
 The course lives in `data/pedagogy/`: `curriculum.json` (units → lesson IDs) plus one
-file per lesson under `lessons/`. v3 ships **15 lessons in 5 units, 76 exercises**:
+file per lesson under `lessons/`. v4 ships **17 lessons in 6 units, 87 exercises**,
+**Santali first**:
 
 | Unit | Lessons |
 |---|---|
+| Johar! Santali | First Words · Around Me |
 | First Words | Greetings · Numbers 1-5 · You & Me |
 | The World Around Us | Body Parts · Animals · Nature |
 | Daily Life | Colours · Food & Water · Family |
@@ -328,11 +331,14 @@ localStorage; hearts/streak roll over daily.
 The engine supports two target languages via `target_lang` (`warli` default,
 `santali`). The Santali seed pack (`data/santali_dictionary/`, 744 entries in Ol
 Chiki script + a grammar stub) is merged from CC-BY-SA open sources — see
-`santali_dictionary/SOURCES.md` for credits. v0 scope, stated honestly in the UI:
-**English input, text output only** (no Santali voice exists, so `speech` mode
-returns text with an explanatory note). The course lessons remain Warli-only;
-adding a Santali course = new `lessons/*.json` files, no code changes — the same
-pattern that will carry Mundari/Ho next.
+`santali_dictionary/SOURCES.md` for credits. The course opens with a Santali
+unit (Johar! — lessons 016–017); hints and audio follow each exercise's
+`target_lang`. **Santali voice**: Ol Chiki is transliterated to Devanagari
+(`services/transliterate.py`, verified against the official UDHR Santali text)
+and read by the Marathi voice — a flagged double approximation, since no
+Santali voice model exists. The course lessons beyond the Santali unit remain
+Warli; adding a Santali course unit = new `lessons/*.json` files, no code
+changes — the same pattern that will carry Mundari/Ho next.
 
 ### Learner accounts (progress tracking)
 

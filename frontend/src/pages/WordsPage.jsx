@@ -134,7 +134,7 @@ export default function WordsPage() {
         </h1>
         <p className="text-sm mt-1 mb-4" style={{ color: '#78716c' }}>
           {target === 'santali'
-            ? 'Santali seed pack (Jharkhand, Ol Chiki) — text only, voice coming.'
+            ? 'Santali seed pack (Jharkhand, Ol Chiki) — tap 🔊 to hear a transliterated voice.'
             : 'Search English, Hindi or Warli, tap 🔊 to hear a word.'}
         </p>
 
@@ -205,7 +205,7 @@ export default function WordsPage() {
         {!error && (
           <div className="flex flex-col gap-3">
             {entries.map((e, i) => (
-              <WordCard key={`${e.warli}-${i}`} entry={e} canHear={target === 'warli'} />
+              <WordCard key={`${e.warli}-${i}`} entry={e} canHear />
             ))}
             {!loading && entries.length === 0 && (
               <p className="text-center text-stone-500 mt-8">

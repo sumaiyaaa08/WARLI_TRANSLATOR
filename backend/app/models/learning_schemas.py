@@ -25,6 +25,7 @@ class Exercise(BaseModel):
     prompt_en: str
     prompt_hi: str
     prompt_mr: Optional[str] = None
+    target_lang: str = "warli"  # 'warli' | 'santali' — which language is taught
     audio_word: Optional[str] = None
     options: Optional[List[str]] = None
     pairs: Optional[List[dict]] = None
@@ -76,6 +77,7 @@ class HintRequest(BaseModel):
     prompt_en: str = Field(..., description="The exercise question in English.")
     correct_answer: str = Field(..., description="The correct Warli answer.")
     source_lang: str = Field("en", description="Language of prompt: 'en', 'hi' or 'mr'.")
+    target_lang: str = Field("warli", description="Language taught: 'warli' or 'santali'.")
 
 
 class HintResponse(BaseModel):

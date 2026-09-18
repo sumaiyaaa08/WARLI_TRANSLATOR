@@ -79,13 +79,13 @@ def get_lesson(lesson_id: str) -> Optional[LessonDetail]:
     return LessonDetail(**raw)
 
 
-def get_hint(prompt_en: str, correct_answer: str) -> HintResponse:
+def get_hint(prompt_en: str, correct_answer: str, target_lang: str = "warli") -> HintResponse:
     """Generate a child-friendly hint by using the rule engine."""
     from .translation import get_engine  # lazy to avoid circular import
 
     try:
         engine = get_engine()
-        result = engine.translate(prompt_en, source_lang="en")
+        result = engine.translate(prompt_en, source_lang="en", target_lang=target_lang)
         matched = [
             t for t in result.tokens
             if t.matched and t.warli == correct_answer
@@ -113,14 +113,24 @@ def get_hint(prompt_en: str, correct_answer: str) -> HintResponse:
 
 
 def get_pronounce(word: str) -> Optional[PronounceResponse]:
-    """Synthesise a single Warli word via the existing GttsWarli service."""
+    """Synthesise a single word via the existing GttsWarli service.
+
+    Ol Chiki (Santali) words are transliterated to Devanagari first and read
+    by the same voice — flagged as an approximation, like everything else.
+    """
+    from .transliterate import contains_olchiki, transliterate_olchiki  # lazy
     from .tts import TTSError, get_tts  # lazy to avoid circular import
 
     word = (word or "").strip()
     if not word:
         return None
     try:
-        result = get_tts().synthesize(word)
+        if contains_olchiki(word):
+            result = get_tts().synthesize(
+                transliterate_olchiki(word), apply_pronunciation=False
+            )
+        else:
+            result = get_tts().synthesize(word)
         return PronounceResponse(
             word=word,
             audio_base64=base64.b64encode(result.audio_bytes).decode("ascii"),

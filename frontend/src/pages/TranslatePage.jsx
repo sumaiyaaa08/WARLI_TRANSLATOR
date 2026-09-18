@@ -80,7 +80,7 @@ export default function TranslatePage() {
       const res = await translateText({
         text: textInput,
         sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
-        outputMode: targetLang === 'santali' ? 'text' : outputMode,
+        outputMode,
         targetLang,
       })
       setResult(res)
@@ -97,7 +97,7 @@ export default function TranslatePage() {
       const res = await translateSpeech({
         audioBlob: blob, filename,
         sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
-        outputMode: targetLang === 'santali' ? 'text' : outputMode,
+        outputMode,
         targetLang,
       })
       setResult(res)
@@ -108,15 +108,14 @@ export default function TranslatePage() {
     }
   }
 
-  // Switching target: Santali pack (v0) understands English input and has no
-  // voice yet, so lock From=English and Output=Text while it is selected.
+  // Switching target: Santali pack (v0) understands English input, so lock
+  // From=English while it is selected. Voice works via transliteration.
   function handleTargetChange(v) {
     setTargetLang(v)
     setResult(null)
     setError(null)
     if (v === 'santali') {
       setSourceLang('en')
-      setOutputMode('text')
     }
   }
 
@@ -141,8 +140,8 @@ export default function TranslatePage() {
         <WarliBorder />
 
         <header className="app-header">
-          <h1>Warli <span className="brand-dot">Translator</span></h1>
-          <p>Type or speak in English / Hindi / Marathi — see and hear it in Warli (Devanagari, Palghar dialect).</p>
+          <h1>Linguify <span className="brand-dot">Translator</span></h1>
+          <p>Type or speak in English / Hindi / Marathi — see and hear it in Warli (Devanagari) or Santali (Ol Chiki).</p>
         </header>
 
         {/* Slim backend status line */}
@@ -190,8 +189,8 @@ export default function TranslatePage() {
           </div>
           {targetLang === 'santali' && (
             <p className="target-note">
-              Santali pack (Jharkhand) understands English for now · text output only — voice coming.
-              From is locked to English.
+              Santali pack (Jharkhand) understands English for now · From is locked to English.
+              Voice reads a Devanagari transliteration — an approximation.
             </p>
           )}
 

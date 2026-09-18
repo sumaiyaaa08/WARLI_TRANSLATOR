@@ -62,7 +62,7 @@ export default function LoginPage() {
               className="text-3xl font-bold mt-1"
               style={{ color: '#1c1917', fontFamily: '"Baloo 2", system-ui, sans-serif' }}
             >
-              {mode === 'signup' ? 'Join Warli Seekho' : 'Welcome back'}
+              {mode === 'signup' ? 'Join Linguify' : 'Welcome back'}
             </h1>
             <p className="text-sm mt-1" style={{ color: '#78716c' }}>
               {mode === 'signup'

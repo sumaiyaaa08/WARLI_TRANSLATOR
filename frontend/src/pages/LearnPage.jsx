@@ -27,9 +27,9 @@ export default function LearnPage() {
       <GameHeader />
       <div className="px-4 pt-4 pb-2 text-center">
         <h1 className="text-4xl font-bold" style={{ color: '#1c1917', fontFamily: '"Baloo 2", system-ui, sans-serif' }}>
-          🌿 Warli Seekho
+          🌿 Linguify
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#78716c' }}>Learn Warli — one lesson at a time</p>
+        <p className="text-sm mt-1" style={{ color: '#78716c' }}>Learn Santali • Learn Warli — one lesson at a time</p>
       </div>
       {loading && (
         <div className="flex flex-col items-center gap-4 mt-8">
