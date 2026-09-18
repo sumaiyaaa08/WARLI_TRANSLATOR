@@ -25,22 +25,23 @@ async function handle(res) {
   return res.json()
 }
 
-// POST /translate/text — text in, Warli text (+optional audio) out.
-export async function translateText({ text, sourceLang = 'en', outputMode = 'text' }) {
+// POST /translate/text — text in, target-language text (+optional audio) out.
+export async function translateText({ text, sourceLang = 'en', outputMode = 'text', targetLang = 'warli' }) {
   const res = await fetch(joinUrl('/translate/text'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, source_lang: sourceLang, output_mode: outputMode }),
+    body: JSON.stringify({ text, source_lang: sourceLang, output_mode: outputMode, target_lang: targetLang }),
   })
   return handle(res)
 }
 
-// POST /translate/speech — audio blob/file in, Warli text (+optional audio) out.
-export async function translateSpeech({ audioBlob, filename = 'recording.webm', sourceLang = 'auto', outputMode = 'text' }) {
+// POST /translate/speech — audio blob/file in, target-language text (+optional audio) out.
+export async function translateSpeech({ audioBlob, filename = 'recording.webm', sourceLang = 'auto', outputMode = 'text', targetLang = 'warli' }) {
   const form = new FormData()
   form.append('audio', audioBlob, filename)
   form.append('source_lang', sourceLang)
   form.append('output_mode', outputMode)
+  form.append('target_lang', targetLang)
   const res = await fetch(joinUrl('/translate/speech'), { method: 'POST', body: form })
   return handle(res)
 }

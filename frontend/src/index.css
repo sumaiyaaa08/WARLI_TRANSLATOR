@@ -148,6 +148,19 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .status-dot.online { background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
 .status-bar .sep { opacity: 0.5; }
 
+/* Note under the composer when the Santali target pack is selected. */
+.target-note {
+  margin: 10px 4px 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px dashed var(--accent);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 /* ------------------------------------------------------------------ cards */
 .card {
   background: var(--surface);

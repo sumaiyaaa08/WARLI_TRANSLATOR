@@ -14,15 +14,15 @@ function joinUrl(path) {
   return `${BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 }
 
-async function searchDictionary(q) {
-  const params = new URLSearchParams({ limit: '60' })
+async function searchDictionary(q, target = 'warli') {
+  const params = new URLSearchParams({ limit: '60', target_lang: target })
   if (q.trim()) params.set('q', q.trim())
   const res = await fetch(joinUrl(`/dictionary?${params.toString()}`))
   if (!res.ok) throw new Error(`Search failed (${res.status})`)
   return res.json()
 }
 
-function WordCard({ entry }) {
+function WordCard({ entry, canHear }) {
   const [playing, setPlaying] = useState(false)
 
   async function speak() {
@@ -70,8 +70,11 @@ function WordCard({ entry }) {
         onClick={speak}
         disabled={playing}
         aria-label={`Hear ${entry.warli}`}
-        className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white shadow"
-        style={{ backgroundColor: playing ? '#d6d3d1' : '#c2571b' }}
+        className="shrink-0 w-11 h-11 rounded-full items-center justify-center text-white shadow"
+        style={{
+          backgroundColor: playing ? '#d6d3d1' : '#c2571b',
+          display: canHear ? 'flex' : 'none',
+        }}
       >
         <Volume2 size={20} />
       </button>
@@ -81,16 +84,17 @@ function WordCard({ entry }) {
 
 export default function WordsPage() {
   const [query, setQuery] = useState('')
+  const [target, setTarget] = useState('warli') // 'warli' | 'santali'
   const [entries, setEntries] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const debounceRef = useRef(null)
 
-  function runSearch(q) {
+  function runSearch(q, t = target) {
     setLoading(true)
     setError(null)
-    searchDictionary(q)
+    searchDictionary(q, t)
       .then(data => {
         setEntries(data.entries || [])
         setTotal(data.count ?? 0)
@@ -111,6 +115,11 @@ export default function WordsPage() {
     debounceRef.current = setTimeout(() => runSearch(value), 450)
   }
 
+  function handleTargetChange(t) {
+    setTarget(t)
+    runSearch(query, t)
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#fef9f0' }}>
       <Navbar />
@@ -124,8 +133,33 @@ export default function WordsPage() {
           📖 Wordbook
         </h1>
         <p className="text-sm mt-1 mb-4" style={{ color: '#78716c' }}>
-          The whole dictionary — search English, Hindi or Warli, tap 🔊 to hear a word.
+          {target === 'santali'
+            ? 'Santali seed pack (Jharkhand, Ol Chiki) — text only, voice coming.'
+            : 'Search English, Hindi or Warli, tap 🔊 to hear a word.'}
         </p>
+
+        {/* Dictionary target toggle */}
+        <div className="flex gap-2 mb-3" role="group" aria-label="Choose dictionary">
+          {[
+            { code: 'warli', label: 'Warli · 2,203' },
+            { code: 'santali', label: 'Santali · 744' },
+          ].map(t => (
+            <button
+              key={t.code}
+              onClick={() => handleTargetChange(t.code)}
+              aria-pressed={target === t.code}
+              className="flex-1 py-2 rounded-full text-sm font-bold"
+              style={{
+                backgroundColor: target === t.code ? '#c2571b' : 'white',
+                color: target === t.code ? 'white' : '#78716c',
+                border: '2px solid',
+                borderColor: target === t.code ? '#c2571b' : '#e7e5e4',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
         {/* Search box */}
         <div
@@ -171,7 +205,7 @@ export default function WordsPage() {
         {!error && (
           <div className="flex flex-col gap-3">
             {entries.map((e, i) => (
-              <WordCard key={`${e.warli}-${i}`} entry={e} />
+              <WordCard key={`${e.warli}-${i}`} entry={e} canHear={target === 'warli'} />
             ))}
             {!loading && entries.length === 0 && (
               <p className="text-center text-stone-500 mt-8">

@@ -32,6 +32,18 @@ class OutputMode(str, Enum):
     speech = "speech"  # also synthesize Warli audio (approximation)
 
 
+class TargetLanguage(str, Enum):
+    """Supported *output* languages (what the user learns).
+
+    Warli is the full pack (dictionary + rules + voice approximation).
+    Santali (Jharkhand, Ol Chiki script) is the seed pack v0: dictionary
+    lookup only, text output only — no voice exists yet.
+    """
+
+    warli = "warli"
+    santali = "santali"
+
+
 # --------------------------------------------------------------------------
 # Requests
 # --------------------------------------------------------------------------
@@ -42,6 +54,9 @@ class TextTranslateRequest(BaseModel):
     )
     output_mode: OutputMode = Field(
         OutputMode.text, description="'speech' also returns synthesized Warli audio."
+    )
+    target_lang: TargetLanguage = Field(
+        TargetLanguage.warli, description="Output language: 'warli' (full pack) or 'santali' (seed pack, text only)."
     )
 
 
@@ -86,8 +101,13 @@ class TTSMeta(BaseModel):
 class TranslationResponse(BaseModel):
     source_text: str
     source_lang: SourceLanguage
+    target_lang: TargetLanguage = TargetLanguage.warli
     warli_text: str
     warli_roman: Optional[str] = None
+    # `translated_text` mirrors `warli_text` for non-Warli targets (e.g. Santali);
+    # `warli_text` is kept populated for backward compatibility.
+    translated_text: Optional[str] = None
+    target_roman: Optional[str] = None
     engine: str
     tokens: List[TokenTranslation] = Field(default_factory=list)
     unmatched: List[str] = Field(default_factory=list)
@@ -115,6 +135,7 @@ class DictionaryResponse(BaseModel):
     count: int
     q: Optional[str] = None
     source_lang: Optional[str] = None
+    target_lang: Optional[str] = None
     entries: List[DictionaryEntry] = Field(default_factory=list)
 
 
@@ -122,6 +143,7 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     translation_engine: str
     dictionary_entries: int
+    santali_entries: int = 0
     correction_pairs: int
     pronunciation_entries: int
     asr_enabled: bool
@@ -131,6 +153,7 @@ class HealthResponse(BaseModel):
 class ReloadResponse(BaseModel):
     status: str = "reloaded"
     dictionary_entries: int
+    santali_entries: int = 0
     correction_pairs: int
     pronunciation_entries: int
 

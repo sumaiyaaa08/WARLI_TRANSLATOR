@@ -73,6 +73,8 @@ class TranslationResult:
     source_text: str
     source_lang: str
     warli_text: str
+    target_lang: str = "warli"
+    warli_text: str
     warli_roman: Optional[str] = None
     engine: str = "rule"
     tokens: List[MappedToken] = field(default_factory=list)
@@ -97,16 +99,25 @@ def _load_json(path: Path, default):
 
 
 class Dictionary:
-    """Loads warli_dictionary.json and builds fast lookup maps.
+    """Loads a target-language dictionary JSON and builds fast lookup maps.
 
     Two source languages are supported (English + Hindi). Phrase keys (multi-word)
     are stored separately from single-word keys so we can do greedy longest-match.
+
+    `word_key` names the target-language headword field in each entry ("warli"
+    for Warli, "santali" for Santali). `cognate_key`, when given, indexes an
+    extra source map from same-family words (Warli uses "mr": Warli is a
+    Marathi-family dialect, so spoken Marathi that equals a Warli headword
+    resolves directly).
     """
 
     MAX_PHRASE_WORDS = 4
+    TARGET_HEADWORDS = ("warli", "santali")
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, word_key: str = "warli", cognate_key: Optional[str] = "mr"):
         self.path = path
+        self.word_key = word_key
+        self.cognate_key = cognate_key
         self.entries: List[dict] = []
         # lang -> {normalized key -> entry}
         self._word_maps: Dict[str, Dict[str, dict]] = {"en": {}, "hi": {}, "mr": {}}
@@ -122,11 +133,11 @@ class Dictionary:
         self._phrase_maps = {"en": {}, "hi": {}, "mr": {}}
         self._warli_pos = {}
         for entry in self.entries:
-            if not isinstance(entry, dict) or not entry.get("warli"):
+            if not isinstance(entry, dict) or not entry.get(self.word_key):
                 continue
-            warli = str(entry["warli"]).strip()
-            if " " not in warli:
-                self._warli_pos.setdefault(warli, entry.get("pos"))
+            headword = str(entry[self.word_key]).strip()
+            if " " not in headword:
+                self._warli_pos.setdefault(headword, entry.get("pos"))
             for lang in ("en", "hi"):
                 key = entry.get(lang)
                 if not key:
@@ -142,13 +153,15 @@ class Dictionary:
                 if lang == "en" and entry.get("pos") == "verb" and " " not in norm:
                     for variant in self._english_verb_variants(norm):
                         self._word_maps[lang].setdefault(variant, entry)
-            # Marathi ('mr'): index an explicit 'mr' gloss when present, PLUS the
-            # Warli headword itself. Warli is a Marathi-family dialect, so a spoken
+            # Cognate map (Warli only): index an explicit gloss when present, PLUS
+            # the headword itself. Warli is a Marathi-family dialect, so a spoken
             # Marathi word that equals a Warli headword resolves to that entry (its
-            # Warli translation is the same word) — correct for the large shared
-            # core vocabulary; anything unmatched still passes through in readable
-            # Devanagari. First entry wins for collisions.
-            for key in (entry.get("mr"), warli):
+            # translation is the same word) — correct for the large shared core
+            # vocabulary; anything unmatched still passes through in readable
+            # Devanagari. First entry wins for collisions. Santali has no cognate
+            # map: its Ol Chiki headwords never collide with source languages.
+            cognate_keys = ([entry.get(self.cognate_key)] if self.cognate_key else []) + [headword]
+            for key in cognate_keys:
                 if not key:
                     continue
                 norm = self._norm_key(str(key))
@@ -331,11 +344,32 @@ class RuleBasedTranslator(TranslationEngine):
         self.dictionary = Dictionary(settings.dictionary_path)
         self.grammar = GrammarRules(settings.grammar_rules_path)
         self.corrector = SpellingCorrector(settings.corrections_path)
+        # Extra target languages. self.dictionary / self.grammar stay the Warli
+        # pair so existing callers (health, /dictionary, hint) keep working.
+        self.dictionaries: Dict[str, Dictionary] = {
+            "warli": self.dictionary,
+            "santali": Dictionary(
+                settings.santali_dictionary_path, word_key="santali", cognate_key=None
+            ),
+        }
+        self.grammars: Dict[str, GrammarRules] = {
+            "warli": self.grammar,
+            "santali": GrammarRules(settings.santali_grammar_path),
+        }
+
+    #: Target languages selectable via translate(..., target_lang=...).
+    TARGET_LANGS = ("warli", "santali")
 
     def reload(self) -> None:
         self.dictionary.load()
         self.grammar.load()
         self.corrector.load()
+        for key, d in self.dictionaries.items():
+            if key != "warli":
+                d.load()
+        for key, g in self.grammars.items():
+            if key != "warli":
+                g.load()
 
     # -- language detection (very light heuristic; ASR usually tells us) -----
     @staticmethod
@@ -344,26 +378,37 @@ class RuleBasedTranslator(TranslationEngine):
         return "hi" if re.search(r"[\u0900-\u097F]", text or "") else "en"
 
     # ------------------------------------------------------------------ main
-    def translate(self, text: str, source_lang: str = "en") -> TranslationResult:
+    def translate(self, text: str, source_lang: str = "en", target_lang: str = "warli") -> TranslationResult:
         text = (text or "").strip()
         warnings: List[str] = []
+        if target_lang not in self.TARGET_LANGS:
+            warnings.append(
+                f"Unknown target language '{target_lang}'; falling back to Warli."
+            )
+            target_lang = "warli"
+        dictionary = self.dictionaries[target_lang]
+        grammar = self.grammars[target_lang]
         if not text:
             return TranslationResult(
-                source_text="", source_lang=source_lang, warli_text="",
-                engine=self.name, warnings=["Empty input text."],
+                source_text="", source_lang=source_lang, target_lang=target_lang,
+                warli_text="", engine=self.name, warnings=["Empty input text."] + warnings,
             )
 
         lang = self.detect_lang(text) if source_lang in ("auto", "", None) else source_lang
         tokens = tokenize(text)
 
         # 1) LOOKUP (greedy longest phrase match)
-        mapped = self._lookup(tokens, lang, warnings)
+        mapped = self._lookup(tokens, lang, warnings, dictionary, grammar)
 
         # 2) GRAMMAR RULES (reorder + inflection)
-        mapped = self._apply_grammar(mapped, tokens, lang)
+        mapped = self._apply_grammar(mapped, tokens, lang, grammar, dictionary)
 
-        # 3) SPELLING CORRECTION / normalization
-        mapped, corrections = self._apply_corrections(mapped)
+        # 3) SPELLING CORRECTION / normalization (Warli correction table only;
+        #    Santali Ol Chiki never matches Devanagari pairs, so skip it there).
+        if target_lang == "warli":
+            mapped, corrections = self._apply_corrections(mapped)
+        else:
+            corrections = []
 
         # Build outputs
         warli_tokens = [m.warli for m in mapped if m.warli]
@@ -378,11 +423,12 @@ class RuleBasedTranslator(TranslationEngine):
                 "through unchanged: " + ", ".join(unmatched[:10])
             )
         if not warli_text:
-            warnings.append("No Warli output produced — check dictionary coverage.")
+            warnings.append(f"No {target_lang.title()} output produced — check dictionary coverage.")
 
         return TranslationResult(
             source_text=text,
             source_lang=lang,
+            target_lang=target_lang,
             warli_text=warli_text,
             warli_roman=warli_roman,
             engine=self.name,
@@ -393,10 +439,11 @@ class RuleBasedTranslator(TranslationEngine):
         )
 
     # -------------------------------------------------------------- 1) lookup
-    def _lookup(self, tokens: List[str], lang: str, warnings: List[str]) -> List[MappedToken]:
+    def _lookup(self, tokens: List[str], lang: str, warnings: List[str],
+                dictionary: Dictionary, grammar: GrammarRules) -> List[MappedToken]:
         mapped: List[MappedToken] = []
-        postpositions = self.grammar.postpositions(lang)
-        function_words = self.grammar.function_words(lang)
+        postpositions = grammar.postpositions(lang)
+        function_words = grammar.function_words(lang)
         i = 0
         n = len(tokens)
         while i < n:
@@ -411,14 +458,14 @@ class RuleBasedTranslator(TranslationEngine):
                     if core:
                         core_words.append(core)
                 norm_span = " ".join(core_words).lower()
-                entry = self.dictionary.lookup(norm_span, lang)
+                entry = dictionary.lookup(norm_span, lang)
                 if entry:
                     lead, _, trail = _strip_punct(tokens[i])
                     last_lead, _, last_trail = _strip_punct(tokens[i + length - 1])
                     mapped.append(
                         MappedToken(
                             source=raw_span,
-                            warli=str(entry["warli"]),
+                            warli=str(entry[dictionary.word_key]),
                             matched=True,
                             pos=entry.get("pos"),
                             roman=entry.get("roman"),
@@ -442,12 +489,12 @@ class RuleBasedTranslator(TranslationEngine):
             if core and core.lower() in function_words:
                 i += 1
                 continue
-            entry = self.dictionary.lookup(core, lang) if core else None
+            entry = dictionary.lookup(core, lang) if core else None
             if entry:
                 mapped.append(
                     MappedToken(
                         source=token,
-                        warli=str(entry["warli"]),
+                        warli=str(entry[dictionary.word_key]),
                         matched=True,
                         pos=entry.get("pos"),
                         roman=entry.get("roman"),
@@ -471,7 +518,7 @@ class RuleBasedTranslator(TranslationEngine):
         return mapped
 
     # ----------------------------------------------------------- 2) grammar
-    def _is_predicate(self, m: MappedToken) -> bool:
+    def _is_predicate(self, m: MappedToken, dictionary: Dictionary) -> bool:
         """True if this token belongs in Warli's final predicate slot.
 
         Lexical verbs and the copula qualify directly. A multi-word phrase entry
@@ -483,10 +530,11 @@ class RuleBasedTranslator(TranslationEngine):
         if m.pos in self.PREDICATE_POS:
             return True
         if m.pos == "phrase" and m.warli and " " in m.warli:
-            return self.dictionary.warli_pos(m.warli.split()[-1]) in self.PREDICATE_POS
+            return dictionary.warli_pos(m.warli.split()[-1]) in self.PREDICATE_POS
         return False
 
-    def _apply_grammar(self, mapped: List[MappedToken], tokens: List[str], lang: str) -> List[MappedToken]:
+    def _apply_grammar(self, mapped: List[MappedToken], tokens: List[str], lang: str,
+                       grammar: GrammarRules, dictionary: Dictionary) -> List[MappedToken]:
         result = list(mapped)
 
         # 2a) Word order: Warli is predominantly SOV. Move predicate tokens to the
@@ -498,8 +546,8 @@ class RuleBasedTranslator(TranslationEngine):
         #     The copula is deliberately EXCLUDED from the inflection step below
         #     (cue rules target to_pos="verb"); that is what stops the perfective
         #     cue on "have" from gluing a suffix onto it ("आहे" -> "आहेलं").
-        if self.grammar.target_order == "SOV":
-            is_pred = [self._is_predicate(m) for m in result]
+        if grammar.target_order == "SOV":
+            is_pred = [self._is_predicate(m, dictionary) for m in result]
             preds = [m for m, p in zip(result, is_pred) if p]
             others = [m for m, p in zip(result, is_pred) if not p]
             # Only reorder if a predicate appears before a non-predicate (SVO-ish).
@@ -517,13 +565,13 @@ class RuleBasedTranslator(TranslationEngine):
         #     everything else is appended (future -> "कर" + "ईल" = "करईल").
         #     Deliberately simple; refine against the research papers.
         lowered = [t.lower() for t in tokens] if lang == "en" else list(tokens)
-        for rule in self.grammar.cue_rules:
+        for rule in grammar.cue_rules:
             cues = [str(c).lower() for c in (rule.get(f"match_any_{lang}") or [])]
             if not any(c in lowered for c in cues):
                 continue
             affix_key = str(rule.get("apply") or "")
             target_pos = rule.get("to_pos", "verb")
-            affix = self.grammar.inflections.get(affix_key)
+            affix = grammar.inflections.get(affix_key)
             if not affix:
                 continue
             is_prefix = affix_key.endswith("_prefix")

@@ -3,7 +3,8 @@
 Two apps, one server, one origin:
 
 1. **Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
-   (Varli, Devanagari) text, with optional spoken output.
+   (Varli, Devanagari) text, with optional spoken output — or get **Santali**
+   (Ol Chiki, Jharkhand) text via the seed pack (text only, no voice yet).
 2. **Learning app** — a gamified Warli course (15 lessons in 5 units, 76
    exercises, trilingual EN/HI/MR instruction), learner **accounts** with cloud
    progress sync, a searchable **wordbook** over
@@ -266,9 +267,9 @@ The UI is served at `GET /`; every JSON endpoint lives under `/api`.
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/translate/text` | `{text, source_lang, output_mode}` → Warli text (+ base64 audio if `speech`) |
-| `POST` | `/api/translate/speech` | multipart `audio` file + `source_lang` + `output_mode` → Warli text (+ audio) |
-| `GET` | `/api/dictionary` | admin/debug lookup; `?q=`, `?source_lang=`, `?limit=` |
+| `POST` | `/api/translate/text` | `{text, source_lang, output_mode, target_lang}` → target text (+ base64 audio if `speech` + Warli) |
+| `POST` | `/api/translate/speech` | multipart `audio` file + `source_lang` + `output_mode` + `target_lang` → target text (+ audio if Warli) |
+| `GET` | `/api/dictionary` | admin/debug lookup; `?q=`, `?source_lang=`, `?target_lang=warli\|santali`, `?limit=` |
 | `GET` | `/api/health` | status + data counts (dictionary / corrections / pronunciation) |
 | `POST` | `/api/admin/reload` | re-read all data files from disk without restarting |
 
@@ -316,10 +317,22 @@ Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and 
 exit (✕) back to the map — a wrong answer can never strand the learner.
 
 Beyond lessons: **`/words`** is a searchable wordbook over the entire 2,203-word
-dictionary (tap 🔊 to hear any word), and **`/teacher`** is a classroom dashboard
+Warli dictionary (tap 🔊 to hear any word) **plus the 744-word Santali pack**
+(text only), and **`/teacher`** is a classroom dashboard
 (KPIs, score chart, struggle areas, student table) fed by `mock_classroom.json`.
 Progress (stars, streak, hearts, completed lessons, language) persists in
 localStorage; hearts/streak roll over daily.
+
+### Santali pack (Jharkhand)
+
+The engine supports two target languages via `target_lang` (`warli` default,
+`santali`). The Santali seed pack (`data/santali_dictionary/`, 744 entries in Ol
+Chiki script + a grammar stub) is merged from CC-BY-SA open sources — see
+`santali_dictionary/SOURCES.md` for credits. v0 scope, stated honestly in the UI:
+**English input, text output only** (no Santali voice exists, so `speech` mode
+returns text with an explanatory note). The course lessons remain Warli-only;
+adding a Santali course = new `lessons/*.json` files, no code changes — the same
+pattern that will carry Mundari/Ho next.
 
 ### Learner accounts (progress tracking)
 

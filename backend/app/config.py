@@ -108,7 +108,6 @@ class Settings:
     @property
     def corrections_path(self) -> Path:
         return self.data_dir / "voice_recording" / "corrections.json"
-
     @property
     def pronunciation_lexicon_path(self) -> Path:
         return self.data_dir / "pronunciation_audio" / "lexicon.json"
@@ -117,6 +116,16 @@ class Settings:
     def pedagogy_dir(self) -> Path:
         """Root directory for all curriculum and lesson JSON files."""
         return self.data_dir / "pedagogy"
+
+    @property
+    def santali_dictionary_path(self) -> Path:
+        """Santali target-language pack (Jharkhand)."""
+        return self.data_dir / "santali_dictionary" / "santali_dictionary.json"
+
+    @property
+    def santali_grammar_path(self) -> Path:
+        """Grammar stub for the Santali target pack."""
+        return self.data_dir / "santali_dictionary" / "santali_grammar.json"
 
     @property
     def users_path(self) -> Path:

@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "name": "Santali grammar stub (seed v0)",
+    "description": "Minimal grammar layer for the Santali target pack. Santali (Munda family) is SOV like Warli, so the reorderer applies. Inflection/postposition maps are intentionally EMPTY for v0 — English function words are dropped so they never leak into Ol Chiki output; unmatched words pass through flagged. Expand with speaker-reviewed rules over time.",
+    "status": "SEED v0 — needs native-speaker review",
+    "schema_version": "2.0"
+  },
+  "word_order": {
+    "target": "SOV",
+    "source_defaults": { "en": "SVO", "hi": "SOV", "mr": "SOV" }
+  },
+  "function_words": {
+    "en": [
+      "the", "a", "an", "of",
+      "is", "am", "are", "was", "were", "be", "been", "being",
+      "do", "does", "did",
+      "will", "shall"
+    ],
+    "hi": [],
+    "mr": []
+  },
+  "inflections": {},
+  "postpositions": { "en": {}, "hi": {}, "mr": {} },
+  "cue_rules": []
+}

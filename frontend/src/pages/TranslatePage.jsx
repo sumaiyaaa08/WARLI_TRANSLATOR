@@ -15,6 +15,10 @@ const MODE_OPTIONS = [
   { value: 'text', label: 'Text' },
   { value: 'speech', label: 'Text + Audio' },
 ]
+const TARGET_OPTIONS = [
+  { value: 'warli', label: 'Warli' },
+  { value: 'santali', label: 'Santali' },
+]
 
 // Accessible segmented toggle (used for From-language and Output-mode).
 // `options` = [{ value, label }]. Uses aria-pressed on each button so screen
@@ -49,6 +53,7 @@ function SendIcon() {
 export default function TranslatePage() {
   const [sourceLang, setSourceLang] = useState('auto')
   const [outputMode, setOutputMode] = useState('text')
+  const [targetLang, setTargetLang] = useState('warli')
   const [textInput, setTextInput] = useState('')
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -72,7 +77,12 @@ export default function TranslatePage() {
     if (!textInput.trim()) { setError('Type or record something to translate.'); return }
     setBusy(true); setError(null); setResult(null)
     try {
-      const res = await translateText({ text: textInput, sourceLang, outputMode })
+      const res = await translateText({
+        text: textInput,
+        sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
+        outputMode: targetLang === 'santali' ? 'text' : outputMode,
+        targetLang,
+      })
       setResult(res)
     } catch (e) {
       setError(e.message || 'Translation failed.')
@@ -84,12 +94,29 @@ export default function TranslatePage() {
   async function onCapture(blob, filename) {
     setBusy(true); setError(null); setResult(null)
     try {
-      const res = await translateSpeech({ audioBlob: blob, filename, sourceLang, outputMode })
+      const res = await translateSpeech({
+        audioBlob: blob, filename,
+        sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
+        outputMode: targetLang === 'santali' ? 'text' : outputMode,
+        targetLang,
+      })
       setResult(res)
     } catch (e) {
       setError(e.message || 'Speech translation failed.')
     } finally {
       setBusy(false)
+    }
+  }
+
+  // Switching target: Santali pack (v0) understands English input and has no
+  // voice yet, so lock From=English and Output=Text while it is selected.
+  function handleTargetChange(v) {
+    setTargetLang(v)
+    setResult(null)
+    setError(null)
+    if (v === 'santali') {
+      setSourceLang('en')
+      setOutputMode('text')
     }
   }
 
@@ -153,7 +180,20 @@ export default function TranslatePage() {
                 onChange={setOutputMode} labelledBy="mode-caption"
               />
             </div>
+            <div className="bar-group">
+              <span className="bar-caption" id="target-caption">To</span>
+              <SegmentedToggle
+                name="target" value={targetLang} options={TARGET_OPTIONS}
+                onChange={handleTargetChange} labelledBy="target-caption"
+              />
+            </div>
           </div>
+          {targetLang === 'santali' && (
+            <p className="target-note">
+              Santali pack (Jharkhand) understands English for now · text output only — voice coming.
+              From is locked to English.
+            </p>
+          )}
 
           <label className="sr-only" htmlFor="text-input">Text to translate</label>
           <textarea

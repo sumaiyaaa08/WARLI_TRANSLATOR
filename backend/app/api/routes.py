@@ -21,6 +21,7 @@ from ..models.schemas import (
     OutputMode,
     ReloadResponse,
     SourceLanguage,
+    TargetLanguage,
     TTSMeta,
     TextTranslateRequest,
     TokenTranslation,
@@ -51,8 +52,13 @@ def _result_to_response(
         source_lang=SourceLanguage(result.source_lang)
         if result.source_lang in ("en", "hi", "mr")
         else SourceLanguage.auto,
+        target_lang=TargetLanguage(result.target_lang)
+        if result.target_lang in ("warli", "santali")
+        else TargetLanguage.warli,
         warli_text=result.warli_text,
         warli_roman=result.warli_roman,
+        translated_text=result.warli_text,
+        target_roman=result.warli_roman,
         engine=result.engine,
         tokens=[
             TokenTranslation(
@@ -74,10 +80,22 @@ def _result_to_response(
     )
 
 
-def _maybe_synthesize(warli_text: str, output_mode: OutputMode):
+def _maybe_synthesize(warli_text: str, output_mode: OutputMode,
+                      target_lang: str = "warli"):
     """If speech output is requested, synthesize Warli audio (approximation)."""
     if output_mode != OutputMode.speech or not warli_text:
         return None, None, None
+    if target_lang != "warli":
+        # No Santali voice exists (Ol Chiki is unsupported by gTTS voices).
+        # Text still returns; the client is told audio is unavailable.
+        logger.info("TTS skipped: no voice for target '%s'.", target_lang)
+        meta = TTSMeta(
+            generated=False, approximation=True, voice_lang=None,
+            pronunciation_layer_applied=False,
+            note=(f"Speech output is unavailable for {target_lang} — no voice "
+                  "exists yet. Text translation above is unaffected."),
+        )
+        return None, None, meta
     try:
         tts_result = get_tts().synthesize(warli_text)
     except TTSError as exc:
@@ -109,8 +127,12 @@ def _maybe_synthesize(warli_text: str, output_mode: OutputMode):
 )
 def translate_text(req: TextTranslateRequest) -> TranslationResponse:
     engine = get_engine()
-    result = engine.translate(req.text, source_lang=req.source_lang.value)
-    audio, mime, tts_meta = _maybe_synthesize(result.warli_text, req.output_mode)
+    result = engine.translate(
+        req.text, source_lang=req.source_lang.value, target_lang=req.target_lang.value
+    )
+    audio, mime, tts_meta = _maybe_synthesize(
+        result.warli_text, req.output_mode, req.target_lang.value
+    )
     return _result_to_response(result, req.output_mode, audio, mime, tts_meta)
 
 
@@ -133,6 +155,7 @@ async def translate_speech(
     audio: UploadFile = File(..., description="Spoken English/Hindi/Marathi audio."),
     source_lang: SourceLanguage = Form(SourceLanguage.auto),
     output_mode: OutputMode = Form(OutputMode.text),
+    target_lang: TargetLanguage = Form(TargetLanguage.warli),
 ) -> TranslationResponse:
     # Guard: upload size.
     raw = await audio.read()
@@ -162,10 +185,10 @@ async def translate_speech(
     lang = lang if lang in supported else detected if detected in supported else "en"
 
     engine = get_engine()
-    result = engine.translate(asr_result.text, source_lang=lang)
+    result = engine.translate(asr_result.text, source_lang=lang, target_lang=target_lang.value)
 
     # 3) Optional TTS: Warli text -> Warli speech (approximation).
-    audio_out, mime, tts_meta = _maybe_synthesize(result.warli_text, output_mode)
+    audio_out, mime, tts_meta = _maybe_synthesize(result.warli_text, output_mode, target_lang.value)
     return _result_to_response(result, output_mode, audio_out, mime, tts_meta)
 
 
@@ -178,17 +201,19 @@ async def translate_speech(
     summary="Browse/search the Warli dictionary (admin & debug).",
 )
 def get_dictionary(
-    q: str | None = Query(None, description="Substring filter across en/hi/warli/roman."),
+    q: str | None = Query(None, description="Substring filter across en/hi/headword/roman."),
     source_lang: SourceLanguage | None = Query(None, description="Restrict to entries with this key."),
+    target_lang: TargetLanguage = Query(TargetLanguage.warli, description="Which dictionary: 'warli' or 'santali'."),
     limit: int = Query(200, ge=1, le=2000),
 ) -> DictionaryResponse:
     engine = get_engine()
-    dictionary = getattr(engine, "dictionary", None)
+    dictionary = getattr(engine, "dictionaries", {}).get(target_lang.value) or getattr(engine, "dictionary", None)
     if dictionary is None:
         raise HTTPException(
             status.HTTP_501_NOT_IMPLEMENTED,
             "Active translation engine does not expose a browsable dictionary.",
         )
+    head_key = getattr(dictionary, "word_key", "warli")
 
     needle = (q or "").strip().lower()
     entries: list[DictionaryEntry] = []
@@ -197,13 +222,13 @@ def get_dictionary(
             continue
         if needle:
             haystack = " ".join(
-                str(e.get(k, "")).lower() for k in ("en", "hi", "warli", "roman")
+                str(e.get(k, "")).lower() for k in ("en", "hi", head_key, "roman")
             )
             if needle not in haystack:
                 continue
         entries.append(
             DictionaryEntry(
-                warli=e.get("warli", ""),
+                warli=e.get(head_key, ""),
                 roman=e.get("roman"),
                 en=e.get("en"),
                 hi=e.get("hi"),
@@ -215,7 +240,7 @@ def get_dictionary(
         if len(entries) >= limit:
             break
 
-    return DictionaryResponse(count=len(entries), q=q, source_lang=source_lang.value if source_lang else None, entries=entries)
+    return DictionaryResponse(count=len(entries), q=q, source_lang=source_lang.value if source_lang else None, target_lang=target_lang.value, entries=entries)
 
 
 # --------------------------------------------------------------------------
@@ -227,10 +252,12 @@ def health() -> HealthResponse:
     dictionary = getattr(engine, "dictionary", None)
     corrector = getattr(engine, "corrector", None)
     layer = get_pronunciation_layer()
+    santali = getattr(engine, "dictionaries", {}).get("santali")
     return HealthResponse(
         status="ok",
         translation_engine=engine.name,
         dictionary_entries=len(dictionary) if dictionary is not None else 0,
+        santali_entries=len(santali) if santali is not None else 0,
         correction_pairs=len(corrector) if corrector is not None else 0,
         pronunciation_entries=len(layer),
         asr_enabled=settings.asr_enabled,
@@ -250,9 +277,11 @@ def admin_reload() -> ReloadResponse:
     layer = reload_pronunciation_layer()
     dictionary = getattr(engine, "dictionary", None)
     corrector = getattr(engine, "corrector", None)
+    santali = getattr(engine, "dictionaries", {}).get("santali")
     return ReloadResponse(
         status="reloaded",
         dictionary_entries=len(dictionary) if dictionary is not None else 0,
+        santali_entries=len(santali) if santali is not None else 0,
         correction_pairs=len(corrector) if corrector is not None else 0,
         pronunciation_entries=len(layer),
     )
