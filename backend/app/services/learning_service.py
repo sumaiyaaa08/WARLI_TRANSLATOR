@@ -42,14 +42,20 @@ def _load_json(path: Path, default):
 
 # ── Service functions ─────────────────────────────────────────────────────────
 
-def get_learning_path() -> LearningPathResponse:
-    """Load curriculum.json and inline lesson summaries from individual files."""
+def get_learning_path(target_lang: Optional[str] = None) -> LearningPathResponse:
+    """Load curriculum.json and inline lesson summaries from individual files.
+
+    `target_lang` ('santali' | 'warli') filters to one language path; None
+    returns everything (Santali units first — primary — then Warli).
+    """
     raw = _load_json(
         settings.pedagogy_dir / "curriculum.json",
         {"version": "1.0", "units": []},
     )
     units = []
     for unit_raw in raw.get("units", []):
+        if target_lang and unit_raw.get("target_lang", "warli") != target_lang:
+            continue
         lesson_summaries = []
         for lesson_id in unit_raw.get("lessons", []):
             lesson_raw = _load_json(
@@ -62,10 +68,13 @@ def get_learning_path() -> LearningPathResponse:
                         title_en=lesson_raw.get("title_en", lesson_id),
                         title_hi=lesson_raw.get("title_hi", lesson_id),
                         title_mr=lesson_raw.get("title_mr", lesson_raw.get("title_hi", lesson_id)),
+                        target_lang=lesson_raw.get("target_lang", "warli"),
                         xp_reward=lesson_raw.get("xp_reward", 10),
                     )
                 )
-        units.append({**unit_raw, "lessons": [ls.model_dump() for ls in lesson_summaries]})
+        units.append({**unit_raw,
+                      "target_lang": unit_raw.get("target_lang", "warli"),
+                      "lessons": [ls.model_dump() for ls in lesson_summaries]})
     return LearningPathResponse(**{**raw, "units": units})
 
 

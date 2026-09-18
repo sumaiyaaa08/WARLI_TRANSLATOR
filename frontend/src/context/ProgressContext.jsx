@@ -16,6 +16,7 @@ const DEFAULT_STATE = {
   lastPlayedDate: null,   // ISO date string "YYYY-MM-DD" or null
   completedLessons: [],   // string[] of lesson IDs
   uiLang: 'hi',           // 'en' | 'hi' | 'mr' — medium of instruction
+  learnTarget: 'santali', // 'santali' (primary) | 'warli' — which language path
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ const ProgressContext = createContext({
   completeLesson: (_lessonId) => {},
   checkDayRollover: () => {},
   setUiLang: (_lang) => {},
+  setLearnTarget: (_target) => {},
 })
 
 // ── Provider ──────────────────────────────────────────────────────────────────
@@ -214,6 +216,12 @@ export function ProgressProvider({ children }) {
     setState((prev) => ({ ...prev, uiLang: lang }))
   }
 
+  /** Set which language path to learn ('santali' | 'warli'). */
+  function setLearnTarget(target) {
+    if (!['santali', 'warli'].includes(target)) return
+    setState((prev) => ({ ...prev, learnTarget: target }))
+  }
+
   // ── Context value ───────────────────────────────────────────────────────────
 
   const value = {
@@ -223,6 +231,7 @@ export function ProgressProvider({ children }) {
     lastPlayedDate: state.lastPlayedDate,
     completedLessons: state.completedLessons,
     uiLang: state.uiLang || 'hi',
+    learnTarget: state.learnTarget || 'santali',
     syncStatus,
     addXp,
     loseHeart,
@@ -230,6 +239,7 @@ export function ProgressProvider({ children }) {
     completeLesson,
     checkDayRollover,
     setUiLang,
+    setLearnTarget,
   }
 
   return (

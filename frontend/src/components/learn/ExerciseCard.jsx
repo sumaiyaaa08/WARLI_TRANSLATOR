@@ -47,6 +47,22 @@ export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
         {secondary && <p className="text-sm text-stone-500">{secondary}</p>}
       </div>
 
+      {/* Display hero — e.g. a giant Ol Chiki letter to name (alphabet lessons) */}
+      {exercise.display && (
+        <motion.div
+          className="mx-auto mb-4 w-32 h-32 rounded-3xl flex items-center justify-center shadow-sm"
+          style={{ backgroundColor: '#fff7ed', border: '3px solid #c2571b' }}
+          initial={{ scale: 0.85 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          aria-label={`Letter: ${exercise.display}`}
+        >
+          <span className="text-7xl font-bold" style={{ color: '#9a3412' }} aria-hidden="true">
+            {exercise.display}
+          </span>
+        </motion.div>
+      )}
+
       {/* Grammar/vocab tip (only on exercises that carry one) */}
       {tip && (
         <div

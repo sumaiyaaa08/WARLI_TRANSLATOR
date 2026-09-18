@@ -26,6 +26,8 @@ class Exercise(BaseModel):
     prompt_hi: str
     prompt_mr: Optional[str] = None
     target_lang: str = "warli"  # 'warli' | 'santali' — which language is taught
+    # Big stimulus shown above the exercise (e.g. an Ol Chiki letter to name).
+    display: Optional[str] = None
     audio_word: Optional[str] = None
     options: Optional[List[str]] = None
     pairs: Optional[List[dict]] = None
@@ -43,6 +45,7 @@ class LessonSummary(BaseModel):
     title_en: str
     title_hi: str
     title_mr: Optional[str] = None
+    target_lang: str = "warli"
     xp_reward: int
 
 
@@ -51,6 +54,7 @@ class LessonDetail(BaseModel):
     title_en: str
     title_hi: str
     title_mr: Optional[str] = None
+    target_lang: str = "warli"
     xp_reward: int
     exercises: List[Exercise] = Field(default_factory=list)
 
@@ -62,6 +66,7 @@ class CurriculumUnit(BaseModel):
     title_en: str
     title_hi: str
     title_mr: Optional[str] = None
+    target_lang: str = "warli"  # 'santali' units come first (primary), Warli after
     icon: str
     lessons: List[LessonSummary] = Field(default_factory=list)
 

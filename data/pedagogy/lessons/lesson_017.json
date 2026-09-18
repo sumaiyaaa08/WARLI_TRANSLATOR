@@ -44,12 +44,13 @@
     },
     {
       "id": "ex_017_04",
-      "type": "listen_type",
+      "type": "multiple_choice",
       "target_lang": "santali",
-      "prompt_en": "Listen and type the word you hear.",
-      "prompt_hi": "सुनो और जो शब्द सुनाई दे वो लिखो।",
-      "prompt_mr": "ऐका आणि ऐकू येणारा शब्द लिहा.",
+      "prompt_en": "Hear the word, tap how it is written.",
+      "prompt_hi": "शब्द सुनो, सही लिखावट चुनो।",
+      "prompt_mr": "शब्द ऐका, बरोबर लिखाण निवडा.",
       "audio_word": "ᱫᱟᱜ",
+      "options": ["ᱫᱟᱜ", "ᱡᱚᱢᱟᱜ", "ᱟᱛᱳ", "ᱫᱤᱱ"],
       "correct": "ᱫᱟᱜ"
     },
     {

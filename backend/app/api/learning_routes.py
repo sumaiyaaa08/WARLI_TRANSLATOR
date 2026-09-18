@@ -33,10 +33,10 @@ learning_router = APIRouter(prefix="/learning")
 @learning_router.get(
     "/path",
     response_model=LearningPathResponse,
-    summary="Return the full curriculum with inlined lesson summaries.",
+    summary="Return the curriculum (optionally one language path) with inlined lesson summaries.",
 )
-def get_path() -> LearningPathResponse:
-    return learning_service.get_learning_path()
+def get_path(target_lang: str | None = Query(None, description="'santali' or 'warli'; omit for both.")) -> LearningPathResponse:
+    return learning_service.get_learning_path(target_lang)
 
 
 # GET /api/learning/lesson/{lesson_id} ────────────────────────────────────────

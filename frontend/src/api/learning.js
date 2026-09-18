@@ -45,11 +45,11 @@ const audioCache = new Map()
 // ── API functions ─────────────────────────────────────────────────────────────
 
 /**
- * GET /api/learning/path
- * Returns the full curriculum (LearningPathResponse) with inlined lesson summaries.
+ * GET /api/learning/path?target_lang=
+ * Returns the curriculum for one language path ('santali' | 'warli').
  */
-export async function getLearningPath() {
-  const res = await fetch(joinUrl('/learning/path'))
+export async function getLearningPath(target = 'santali') {
+  const res = await fetch(joinUrl(`/learning/path?target_lang=${encodeURIComponent(target)}`))
   return handle(res)
 }
 

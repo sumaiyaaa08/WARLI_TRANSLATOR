@@ -1,0 +1,72 @@
+{
+  "id": "lesson_022",
+  "title_en": "Two-Letter Words",
+  "title_hi": "दो अक्षर के शब्द",
+  "title_mr": "दोन अक्षरी शब्द",
+  "target_lang": "santali",
+  "xp_reward": 10,
+  "exercises": [
+    {
+      "id": "ex_022_01",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "How do you say 'tea' in Santali?",
+      "prompt_hi": "'चाय' को Santali में क्या कहते हैं?",
+      "prompt_mr": "'चहा' ला संतालीमध्ये काय म्हणतात?",
+      "audio_word": "ᱪᱚ",
+      "options": ["ᱪᱚ", "ᱛᱤ", "ᱢᱩ", "ᱩᱞ"],
+      "correct": "ᱪᱚ",
+      "tip_en": "Read it piece by piece: ᱪ (uch) + ᱚ (la) — two letters, one word.",
+      "tip_hi": "टुकड़ों में पढ़ो: ᱪ + ᱚ — दो अक्षर, एक शब्द।",
+      "tip_mr": "तुकड्यांत वाचा: ᱪ + ᱚ — दोन अक्षरं, एक शब्द."
+    },
+    {
+      "id": "ex_022_02",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "Which Santali word means 'hand'?",
+      "prompt_hi": "'हाथ' के लिए Santali शब्द कौन सा है?",
+      "prompt_mr": "'हात' साठी संताली शब्द कोणता?",
+      "audio_word": "ᱛᱤ",
+      "options": ["ᱛᱤ", "ᱢᱩ", "ᱡᱚ", "ᱩᱵ"],
+      "correct": "ᱛᱤ"
+    },
+    {
+      "id": "ex_022_03",
+      "type": "match_pairs",
+      "target_lang": "santali",
+      "prompt_en": "Match the tiny words.",
+      "prompt_hi": "छोटे शब्दों को मिलाओ।",
+      "prompt_mr": "छोटे शब्द जुळवा.",
+      "pairs": [
+        { "source": "nose", "warli": "ᱢᱩ" },
+        { "source": "mango", "warli": "ᱩᱞ" },
+        { "source": "fruit", "warli": "ᱡᱚ" },
+        { "source": "hair", "warli": "ᱩᱵ" }
+      ],
+      "correct": "all"
+    },
+    {
+      "id": "ex_022_04",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "Hear the word, tap how it is written.",
+      "prompt_hi": "शब्द सुनो, सही लिखावट चुनो।",
+      "prompt_mr": "शब्द ऐका, बरोबर लिखाण निवडा.",
+      "audio_word": "ᱪᱚ",
+      "options": ["ᱪᱚ", "ᱛᱤ", "ᱟᱨ", "ᱮᱢ"],
+      "correct": "ᱪᱚ"
+    },
+    {
+      "id": "ex_022_05",
+      "type": "multiple_choice",
+      "target_lang": "santali",
+      "prompt_en": "What does 'ᱮᱢ' mean?",
+      "prompt_hi": "'ᱮᱢ' का अर्थ क्या है?",
+      "prompt_mr": "'ᱮᱢ' चा अर्थ काय?",
+      "audio_word": "ᱮᱢ",
+      "options": ["give", "take", "go", "come"],
+      "correct": "give"
+    }
+  ]
+}
