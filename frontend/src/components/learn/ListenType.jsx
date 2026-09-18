@@ -1,11 +1,13 @@
 // ListenType.jsx — Listen-and-type exercise.
-// Plays the Warli audio for `audio_word`; the learner types what they hear.
-// Comparison is whitespace-trimmed and exact (Devanagari).
+// Plays the audio for `audio_word`; the learner types what they hear.
+// Comparison is whitespace-trimmed and exact. When the exercise teaches
+// Santali, the Ol Chiki keyboard pops up (no system keyboard can type it).
 
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Volume2, Loader2 } from 'lucide-react'
 import { getPronounce, base64ToAudioUrl } from '../../api/learning'
+import OlChikiKeyboard from './OlChikiKeyboard'
 
 export default function ListenType({ exercise, onCorrect, onWrong }) {
   const [value, setValue] = useState('')
@@ -14,6 +16,8 @@ export default function ListenType({ exercise, onCorrect, onWrong }) {
   const [audioLoading, setAudioLoading] = useState(false)
   const [audioAvailable, setAudioAvailable] = useState(false)
   const audioRef = useRef(null)
+  const inputRef = useRef(null)
+  const needsOlChiki = (exercise.target_lang || 'warli') === 'santali'
 
   // Fetch and auto-play audio on mount
   useEffect(() => {
@@ -96,15 +100,21 @@ export default function ListenType({ exercise, onCorrect, onWrong }) {
 
       {/* Answer input */}
       <input
+        ref={inputRef}
         value={value}
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') handleCheck() }}
         disabled={revealed}
-        placeholder="Type in Warli…"
-        aria-label="Type the Warli word you hear"
+        placeholder={needsOlChiki ? 'Type in Santali…' : 'Type in Warli…'}
+        aria-label={needsOlChiki ? 'Type the Santali word you hear' : 'Type the Warli word you hear'}
         className="w-full rounded-2xl p-4 text-lg text-center font-semibold outline-none transition-colors"
         style={inputStyle}
       />
+
+      {/* Ol Chiki keyboard pops up exactly when Santali must be typed */}
+      {needsOlChiki && !revealed && (
+        <OlChikiKeyboard inputRef={inputRef} value={value} onChange={setValue} />
+      )}
 
       {revealed && !isCorrect && (
         <p className="text-sm font-semibold" style={{ color: '#22c55e' }}>

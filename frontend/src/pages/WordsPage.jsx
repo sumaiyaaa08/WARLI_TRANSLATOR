@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Volume2, Search } from 'lucide-react'
 import Navbar from '../components/layout/Navbar'
 import GameHeader from '../components/layout/GameHeader'
+import OlChikiKeyboard from '../components/learn/OlChikiKeyboard'
 import { getPronounce, base64ToAudioUrl } from '../api/learning'
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api'
@@ -90,6 +91,7 @@ export default function WordsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const debounceRef = useRef(null)
+  const inputRef = useRef(null)
 
   function runSearch(q, t = target) {
     setLoading(true)
@@ -168,9 +170,10 @@ export default function WordsPage() {
         >
           <Search size={18} style={{ color: '#a8a29e' }} />
           <input
+            ref={inputRef}
             value={query}
             onChange={e => handleChange(e.target.value)}
-            placeholder="Search: water, पाणी, love…"
+            placeholder={target === 'santali' ? 'Search: water, day…' : 'Search: water, पाणी, love…'}
             aria-label="Search the dictionary"
             className="flex-1 outline-none text-base bg-transparent"
             style={{ color: '#1c1917' }}
@@ -185,6 +188,12 @@ export default function WordsPage() {
             </button>
           )}
         </div>
+        {/* Ol Chiki keyboard pops up exactly when Santali must be typed */}
+        {target === 'santali' && (
+          <div className="mb-2">
+            <OlChikiKeyboard inputRef={inputRef} value={query} onChange={handleChange} />
+          </div>
+        )}
         <p className="text-xs mb-4 px-1" style={{ color: '#a8a29e' }}>
           {loading ? 'Searching…' : `${entries.length} shown${total ? ` (of ${total} matches)` : ''}`}
         </p>
