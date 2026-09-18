@@ -17,6 +17,7 @@ class ExerciseType(str, Enum):
     multiple_choice = "multiple_choice"
     match_pairs = "match_pairs"
     listen_type = "listen_type"
+    teach = "teach"  # intro card: teaches first, no scoring — "Got it" advances
 
 
 class Exercise(BaseModel):
@@ -28,10 +29,16 @@ class Exercise(BaseModel):
     target_lang: str = "warli"  # 'warli' | 'santali' — which language is taught
     # Big stimulus shown above the exercise (e.g. an Ol Chiki letter to name).
     display: Optional[str] = None
+    # Teach-card body + optional letter grid [{char, name}].
+    body_en: Optional[str] = None
+    body_hi: Optional[str] = None
+    body_mr: Optional[str] = None
+    letters: Optional[List[dict]] = None
     audio_word: Optional[str] = None
     options: Optional[List[str]] = None
     pairs: Optional[List[dict]] = None
-    correct: str
+    # Correct answer (quiz types). Teach cards carry none — "Got it" advances.
+    correct: Optional[str] = None
     # Optional grammar/vocab tip shown above the exercise (SOV rule etc.).
     tip_en: Optional[str] = None
     tip_hi: Optional[str] = None

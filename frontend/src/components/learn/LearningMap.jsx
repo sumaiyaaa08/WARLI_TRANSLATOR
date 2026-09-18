@@ -43,15 +43,16 @@ export default function LearningMap({ units, completedLessons }) {
 
   return (
     <div className="w-full max-w-md mx-auto pb-12 px-4">
-      {units.map((unit) => {
+      {units.map((unit, unitIdx) => {
         const done = unit.lessons.filter(l => completedLessons.includes(l.id)).length
         const total = unit.lessons.length
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0
 
         return (
           <section key={unit.id} className="mb-8">
             {/* ── Mural banner ─────────────────────────────────────────── */}
             <motion.div
-              className="rounded-3xl px-5 pt-4 pb-5 shadow-md relative overflow-hidden"
+              className="rounded-3xl px-5 pt-4 pb-4 shadow-md relative overflow-hidden"
               style={{ backgroundColor: '#c2571b' }}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -61,27 +62,55 @@ export default function LearningMap({ units, completedLessons }) {
               <div style={{ color: '#fdf5ea' }}>
                 <WarliDivider />
               </div>
-              <div className="flex items-end justify-between gap-3 mt-1">
-                <div className="min-w-0">
+              <div className="flex items-center gap-3 mt-1">
+                <span
+                  className="shrink-0 rounded-2xl w-11 h-11 flex items-center justify-center text-base font-bold"
+                  style={{
+                    backgroundColor: 'rgba(253,245,234,0.18)',
+                    color: '#fdf5ea',
+                    fontFamily: '"Baloo 2", system-ui, sans-serif',
+                  }}
+                  aria-hidden="true"
+                >
+                  {unitIdx + 1}
+                </span>
+                <div className="flex-1 min-w-0">
                   <h2
-                    className="text-2xl font-bold leading-tight"
+                    className="text-2xl font-bold leading-tight truncate"
                     style={{ color: '#fdf5ea', fontFamily: '"Baloo 2", system-ui, sans-serif' }}
                   >
                     {unitTitle(unit)}
                   </h2>
                   {uiLang !== 'en' && (
-                    <p className="text-xs font-semibold" style={{ color: 'rgba(253,245,234,0.75)' }}>
+                    <p className="text-xs font-semibold truncate" style={{ color: 'rgba(253,245,234,0.75)' }}>
                       {unit.title_en}
                     </p>
                   )}
                 </div>
                 <span
-                  className="shrink-0 rounded-full px-3 py-1 text-xs font-bold"
-                  style={{ backgroundColor: '#fdf5ea', color: '#9a3412' }}
+                  className="shrink-0 text-xs font-bold"
+                  style={{ color: '#fdf5ea' }}
                   aria-label={`${done} of ${total} lessons done`}
                 >
-                  {done === total ? `✓ ${done}/${total}` : `${done}/${total}`}
+                  {done === total && total > 0 ? `✓ ${done}/${total}` : `${done}/${total}`}
                 </span>
+              </div>
+              {/* progress bar */}
+              <div
+                className="h-1.5 rounded-full mt-3 overflow-hidden"
+                style={{ backgroundColor: 'rgba(253,245,234,0.25)' }}
+                role="progressbar"
+                aria-valuenow={pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: '#fdf5ea' }}
+                  initial={false}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.5 }}
+                />
               </div>
             </motion.div>
 
@@ -104,6 +133,7 @@ export default function LearningMap({ units, completedLessons }) {
                   >
                     <LessonNode
                       lesson={lesson}
+                      index={lessonIdx}
                       status={status}
                       onClick={() => handleNodeClick(lesson.id, status)}
                     />

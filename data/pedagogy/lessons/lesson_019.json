@@ -7,6 +7,51 @@
   "xp_reward": 10,
   "exercises": [
     {
+      "id": "ex_019_00",
+      "type": "teach",
+      "target_lang": "santali",
+      "prompt_en": "Meet 8 consonants",
+      "prompt_hi": "8 व्यंजनों से मिलो",
+      "prompt_mr": "८ व्यंजनांना भेटा",
+      "body_en": "Every shape is a little picture with a name. Learn these eight, then prove it below.",
+      "body_hi": "हर शक्ल एक छोटी तस्वीर है जिसके साथ नाम है।",
+      "body_mr": "प्रत्येक आकार एक छोटं चित्र आहे, त्यासोबत नाव.",
+      "letters": [
+        {
+          "char": "ᱠ",
+          "name": "aak"
+        },
+        {
+          "char": "ᱜ",
+          "name": "ag"
+        },
+        {
+          "char": "ᱝ",
+          "name": "ang"
+        },
+        {
+          "char": "ᱪ",
+          "name": "uch"
+        },
+        {
+          "char": "ᱡ",
+          "name": "aaj"
+        },
+        {
+          "char": "ᱧ",
+          "name": "iny"
+        },
+        {
+          "char": "ᱴ",
+          "name": "ott"
+        },
+        {
+          "char": "ᱰ",
+          "name": "edd"
+        }
+      ]
+    },
+    {
       "id": "ex_019_01",
       "type": "multiple_choice",
       "target_lang": "santali",
@@ -14,7 +59,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱠ",
-      "options": ["aak", "ag", "ang", "aaj"],
+      "options": [
+        "aak",
+        "ag",
+        "ang",
+        "aaj"
+      ],
       "correct": "aak",
       "tip_en": "Every Ol Chiki shape is a little picture — ᱠ (aak) echoes a swan's call.",
       "tip_hi": "हर Ol Chiki अक्षर एक छोटी तस्वीर है।",
@@ -28,7 +78,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱡ",
-      "options": ["aaj", "aak", "uch", "iny"],
+      "options": [
+        "aaj",
+        "aak",
+        "uch",
+        "iny"
+      ],
       "correct": "aaj"
     },
     {
@@ -39,7 +94,12 @@
       "prompt_hi": "सुनो — कौन से अक्षर का नाम सुनाई दिया?",
       "prompt_mr": "ऐका — कोणत्या अक्षराचे नाव ऐकू आले?",
       "audio_word": "ᱜ",
-      "options": ["ag", "aak", "ang", "aaj"],
+      "options": [
+        "ag",
+        "aak",
+        "ang",
+        "aaj"
+      ],
       "correct": "ag"
     },
     {
@@ -50,9 +110,18 @@
       "prompt_hi": "हर अक्षर को उसके नाम से मिलाओ।",
       "prompt_mr": "प्रत्येक अक्षर त्याच्या नावाशी जुळवा.",
       "pairs": [
-        { "source": "ang", "warli": "ᱝ" },
-        { "source": "uch", "warli": "ᱪ" },
-        { "source": "iny", "warli": "ᱧ" }
+        {
+          "source": "ang",
+          "warli": "ᱝ"
+        },
+        {
+          "source": "uch",
+          "warli": "ᱪ"
+        },
+        {
+          "source": "iny",
+          "warli": "ᱧ"
+        }
       ],
       "correct": "all"
     },
@@ -64,7 +133,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱴ",
-      "options": ["ott", "edd", "unn", "at"],
+      "options": [
+        "ott",
+        "edd",
+        "unn",
+        "at"
+      ],
       "correct": "ott"
     }
   ]

@@ -67,6 +67,11 @@ export default function LessonPlayer() {
 
   const exercises = lesson?.exercises || []
   const exercise = exercises[currentIdx]
+  // Teach cards are free (no stars); the reward splits across quiz items only.
+  const quizTotal = exercises.filter(e => e.type !== 'teach').length
+  const teachTotal = exercises.length - quizTotal
+  const quizDone = exercises.slice(0, currentIdx + 1).filter(e => e.type !== 'teach').length
+  const teachDone = Math.min(currentIdx + 1, teachTotal)
   const lessonTitle = lesson
     ? (uiLang === 'mr'
         ? (lesson.title_mr || lesson.title_hi)
@@ -77,7 +82,7 @@ export default function LessonPlayer() {
 
   function handleCorrect() {
     if (!lesson || feedback) return
-    const xpPerExercise = Math.floor(lesson.xp_reward / Math.max(exercises.length, 1))
+    const xpPerExercise = Math.floor(lesson.xp_reward / Math.max(quizTotal, 1))
     addXp(xpPerExercise)
     setSessionXp(prev => prev + xpPerExercise)
     setFeedback({ ok: true, xp: xpPerExercise })
@@ -103,6 +108,17 @@ export default function LessonPlayer() {
   function handleContinue() {
     if (!lesson || !feedback) return
     setFeedback(null)
+    if (currentIdx + 1 < exercises.length) {
+      setCurrentIdx(i => i + 1)
+    } else {
+      completeLesson(lessonId)
+      setShowComplete(true)
+    }
+  }
+
+  // "Got it" on a teach card: advance free — no stars, no hearts, no footer.
+  function handleNext() {
+    if (!lesson || feedback) return
     if (currentIdx + 1 < exercises.length) {
       setCurrentIdx(i => i + 1)
     } else {
@@ -191,6 +207,30 @@ export default function LessonPlayer() {
         </span>
       </div>
 
+      {/* Phase tracker: Learn first, then Practice */}
+      {teachTotal > 0 && (
+        <div className="w-full max-w-lg mx-auto px-4 pb-1 flex items-center gap-2 text-xs font-bold">
+          <span
+            className="rounded-full px-2.5 py-0.5"
+            style={{
+              backgroundColor: currentIdx < teachTotal ? '#c2571b' : '#f0fdf4',
+              color: currentIdx < teachTotal ? 'white' : '#15803d',
+            }}
+          >
+            📖 Learn {teachDone}/{teachTotal}
+          </span>
+          <span
+            className="rounded-full px-2.5 py-0.5"
+            style={{
+              backgroundColor: currentIdx >= teachTotal ? '#c2571b' : '#f5f5f4',
+              color: currentIdx >= teachTotal ? 'white' : '#a8a29e',
+            }}
+          >
+            ✏️ Practice {quizDone}/{quizTotal}
+          </span>
+        </div>
+      )}
+
       <main className="flex-1 overflow-y-auto pb-32">
         <AnimatePresence mode="wait">
           {exercise && (
@@ -199,13 +239,14 @@ export default function LessonPlayer() {
               exercise={exercise}
               onCorrect={handleCorrect}
               onWrong={handleWrong}
+              onNext={handleNext}
             />
           )}
         </AnimatePresence>
       </main>
 
-      {/* Mascot hint — fixed position, hidden while the feedback footer is up */}
-      {exercise && !feedback && (
+      {/* Mascot hint — fixed position, hidden on teach cards and feedback */}
+      {exercise && exercise.type !== 'teach' && !feedback && (
         <MascotHint
           exercise={exercise}
           hintsRemaining={hintsRemaining}

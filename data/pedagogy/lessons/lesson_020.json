@@ -7,6 +7,51 @@
   "xp_reward": 10,
   "exercises": [
     {
+      "id": "ex_020_00",
+      "type": "teach",
+      "target_lang": "santali",
+      "prompt_en": "Meet 8 more consonants",
+      "prompt_hi": "8 और व्यंजन",
+      "prompt_mr": "आणखी ८ व्यंजनं",
+      "body_en": "Half the alphabet is already yours. These eight finish most of it.",
+      "body_hi": "आधी वर्णमाला तुम्हारी हो चुकी। ये आठ बाकी पूरी कर देंगे।",
+      "body_mr": "अर्धी मुळाक्षरं आधीच तुमची झाली. ही आठ उरलेली पूर्ण करतील.",
+      "letters": [
+        {
+          "char": "ᱛ",
+          "name": "at"
+        },
+        {
+          "char": "ᱫ",
+          "name": "ud"
+        },
+        {
+          "char": "ᱱ",
+          "name": "en"
+        },
+        {
+          "char": "ᱯ",
+          "name": "ep"
+        },
+        {
+          "char": "ᱵ",
+          "name": "ob"
+        },
+        {
+          "char": "ᱢ",
+          "name": "aam"
+        },
+        {
+          "char": "ᱭ",
+          "name": "uy"
+        },
+        {
+          "char": "ᱞ",
+          "name": "al"
+        }
+      ]
+    },
+    {
       "id": "ex_020_01",
       "type": "multiple_choice",
       "target_lang": "santali",
@@ -14,7 +59,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱛ",
-      "options": ["at", "ud", "en", "ep"],
+      "options": [
+        "at",
+        "ud",
+        "en",
+        "ep"
+      ],
       "correct": "at"
     },
     {
@@ -25,7 +75,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱢ",
-      "options": ["aam", "uy", "al", "ob"],
+      "options": [
+        "aam",
+        "uy",
+        "al",
+        "ob"
+      ],
       "correct": "aam"
     },
     {
@@ -36,7 +91,12 @@
       "prompt_hi": "सुनो — कौन से अक्षर का नाम सुनाई दिया?",
       "prompt_mr": "ऐका — कोणत्या अक्षराचे नाव ऐकू आले?",
       "audio_word": "ᱱ",
-      "options": ["en", "ep", "al", "ir"],
+      "options": [
+        "en",
+        "ep",
+        "al",
+        "ir"
+      ],
       "correct": "en"
     },
     {
@@ -47,9 +107,18 @@
       "prompt_hi": "हर अक्षर को उसके नाम से मिलाओ।",
       "prompt_mr": "प्रत्येक अक्षर त्याच्या नावाशी जुळवा.",
       "pairs": [
-        { "source": "ud", "warli": "ᱫ" },
-        { "source": "ep", "warli": "ᱯ" },
-        { "source": "ob", "warli": "ᱵ" }
+        {
+          "source": "ud",
+          "warli": "ᱫ"
+        },
+        {
+          "source": "ep",
+          "warli": "ᱯ"
+        },
+        {
+          "source": "ob",
+          "warli": "ᱵ"
+        }
       ],
       "correct": "all"
     },
@@ -61,7 +130,12 @@
       "prompt_hi": "इस अक्षर का नाम क्या है?",
       "prompt_mr": "या अक्षराचे नाव काय?",
       "display": "ᱞ",
-      "options": ["al", "ir", "uy", "en"],
+      "options": [
+        "al",
+        "ir",
+        "uy",
+        "en"
+      ],
       "correct": "al"
     }
   ]

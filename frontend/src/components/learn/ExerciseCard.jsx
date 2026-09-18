@@ -5,9 +5,10 @@ import { motion } from 'framer-motion'
 import MultipleChoice from './MultipleChoice'
 import MatchPairs from './MatchPairs'
 import ListenType from './ListenType'
+import TeachCard from './TeachCard'
 import { useProgress } from '../../context/ProgressContext'
 
-export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
+export default function ExerciseCard({ exercise, onCorrect, onWrong, onNext }) {
   const { uiLang } = useProgress()
   const primary = uiLang === 'mr'
     ? (exercise.prompt_mr || exercise.prompt_hi)
@@ -23,6 +24,8 @@ export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
 
   function renderExercise() {
     switch (exercise.type) {
+      case 'teach':
+        return <TeachCard exercise={exercise} onNext={onNext} />
       case 'multiple_choice':
         return <MultipleChoice exercise={exercise} onCorrect={onCorrect} onWrong={onWrong} />
       case 'match_pairs':
@@ -41,11 +44,13 @@ export default function ExerciseCard({ exercise, onCorrect, onWrong }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Prompt */}
-      <div className="mb-4 text-center">
-        <p className="text-xl font-semibold text-stone-800 mb-1">{primary}</p>
-        {secondary && <p className="text-sm text-stone-500">{secondary}</p>}
-      </div>
+      {/* Prompt (quiz types only — teach cards carry their own heading) */}
+      {exercise.type !== 'teach' && (
+        <div className="mb-4 text-center">
+          <p className="text-xl font-semibold text-stone-800 mb-1">{primary}</p>
+          {secondary && <p className="text-sm text-stone-500">{secondary}</p>}
+        </div>
+      )}
 
       {/* Display hero — e.g. a giant Ol Chiki letter to name (alphabet lessons) */}
       {exercise.display && (

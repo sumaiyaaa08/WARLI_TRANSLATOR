@@ -6,8 +6,9 @@ Two apps, one server, one origin:
    (Varli, Devanagari) text, with optional spoken output — or get **Santali**
    (Ol Chiki, Jharkhand) text via the seed pack (text only, no voice yet).
 2. **Learning app** — a gamified course starting with **Santali first**
-   (Johar! unit) then Warli (15 Warli lessons in 5 units + 2 Santali lessons,
-   87 exercises, trilingual EN/HI/MR instruction), learner **accounts** with cloud
+   (Ol Chiki script → tiny words → everyday talk, then 15 Warli lessons:
+   23 lessons in 8 units, 123 exercises, trilingual EN/HI/MR instruction),
+   learner **accounts** with cloud
    progress sync, a searchable **wordbook** over
    the full dictionaries with tap-to-hear pronunciation, and a
    **teacher dashboard** with class analytics.
@@ -299,12 +300,14 @@ unsupported audio format, `413` too large, `422` validation, `400` no speech det
 ## Learning app (Warli Seekho)
 
 The course lives in `data/pedagogy/`: `curriculum.json` (units → lesson IDs) plus one
-file per lesson under `lessons/`. v4 ships **17 lessons in 6 units, 87 exercises**,
+file per lesson under `lessons/`. v6 ships **23 lessons in 8 units, 123 exercises**,
 **Santali first**:
 
 | Unit | Lessons |
 |---|---|
-| Johar! Santali | First Words · Around Me |
+| Ol Chiki Script | Meet the Vowels · First/More/Last Consonants |
+| Tiny Words | Two-Letter · Three-Letter Words |
+| Everyday Santali | Johar! First Words · Around Me |
 | First Words | Greetings · Numbers 1-5 · You & Me |
 | The World Around Us | Body Parts · Animals · Nature |
 | Daily Life | Colours · Food & Water · Family |
@@ -314,8 +317,11 @@ file per lesson under `lessons/`. v4 ships **17 lessons in 6 units, 87 exercises
 Every lesson carries **trilingual instruction** (`prompt_en` / `prompt_hi` / `prompt_mr`,
 switchable in the navbar, persisted in localStorage), and sentence lessons carry
 **grammar tips** (`tip_en/hi/mr`, e.g. the SOV verb-last rule). Exercise types:
-`multiple_choice` (listen-and-choose, auto-playing audio), `match_pairs`
-(tap-to-match), `listen_type` (listen-and-type). Answers open an original
+`multiple_choice` (listen-and-choose with auto-playing audio, or letter naming
+with a giant display letter), `match_pairs` (tap-to-match), `listen_type`
+(listen-and-type), and `teach` (intro cards that teach first — alphabet grids,
+joining rules — advancing free via "Got it"). Santali typing uses the built-in
+Ol Chiki on-screen keyboard, since no system keyboard ships it. Answers open an original
 Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and an
 exit (✕) back to the map — a wrong answer can never strand the learner.
 

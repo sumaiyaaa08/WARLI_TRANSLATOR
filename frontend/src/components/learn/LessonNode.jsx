@@ -12,7 +12,7 @@ const MEDALLIONS = {
   completed: { icon: '✓', bg: '#22c55e', fg: '#ffffff' },
 }
 
-export default function LessonNode({ lesson, status, onClick }) {
+export default function LessonNode({ lesson, index = 0, status, onClick }) {
   const { uiLang } = useProgress()
   const displayTitle =
     uiLang === 'mr'
@@ -20,6 +20,7 @@ export default function LessonNode({ lesson, status, onClick }) {
       : uiLang === 'en'
         ? lesson.title_en
         : lesson.title_hi
+  const chapterNo = String(index + 1).padStart(2, '0')
 
   const medallion = MEDALLIONS[status] || MEDALLIONS.locked
   const clickable = status === 'unlocked' || status === 'completed'
@@ -63,7 +64,8 @@ export default function LessonNode({ lesson, status, onClick }) {
             fontFamily: '"Baloo 2", system-ui, sans-serif',
           }}
         >
-          {displayTitle}
+          <span style={{ color: edgeColor }}>{chapterNo}</span>
+          {' · '}{displayTitle}
         </span>
         {uiLang !== 'en' && (
           <span className="block text-xs truncate" style={{ color: '#a8a29e' }}>

@@ -64,13 +64,21 @@ export default function LearnPage() {
       <Navbar />
       <GameHeader />
 
-      <div className="px-4 pt-4 pb-1 text-center">
-        <h1 className="text-4xl font-bold" style={{ color: '#1c1917', fontFamily: '"Baloo 2", system-ui, sans-serif' }}>
-          🌿 Linguify
-        </h1>
-        <p className="text-sm mt-1" style={{ color: '#78716c' }}>
-          What do you want to learn today?
-        </p>
+      <div className="px-4 pt-4 pb-5">
+        <div
+          className="max-w-md mx-auto rounded-3xl px-5 pt-5 pb-4 shadow-md text-center"
+          style={{ backgroundColor: '#c2571b' }}
+        >
+          <h1 className="text-4xl font-bold" style={{ color: '#fdf5ea', fontFamily: '"Baloo 2", system-ui, sans-serif' }}>
+            🌿 Linguify
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'rgba(253,245,234,0.85)' }}>
+            What do you want to learn today?
+          </p>
+          <div style={{ color: '#fdf5ea' }} aria-hidden="true">
+            <WarliDivider />
+          </div>
+        </div>
       </div>
 
       {/* ── Language chooser ─────────────────────────────────────────── */}
@@ -121,7 +129,9 @@ export default function LearnPage() {
       </div>
 
       <div className="max-w-md mx-auto px-8" style={{ color: '#c2571b' }} aria-hidden="true">
-        <WarliDivider />
+        <p className="text-center text-xs font-bold uppercase tracking-widest" style={{ color: '#a8a29e' }}>
+          ↓ pick a language, then walk its trail ↓
+        </p>
       </div>
 
       {loading && (
