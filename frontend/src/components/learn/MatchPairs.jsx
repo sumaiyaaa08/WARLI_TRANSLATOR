@@ -1,8 +1,36 @@
 // MatchPairs.jsx — Tap-to-match pairs exercise.
-// Two columns: source words (left) and Warli words (right), both shuffled.
+// Two columns: source words (left, with picture emoji for young learners)
+// and Warli words (right), both shuffled.
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+
+// Picture for the source word (English). Kids who can't read yet can still
+// play by pictures. Missing words simply show text — no fallback tiles.
+const PAIR_EMOJI = {
+  hello: '👋', goodbye: '👋', 'thank you': '🙏', thanks: '🙏', please: '🙏',
+  yes: '✅', no: '❌', water: '💧', rice: '🍚', milk: '🥛', mango: '🥭',
+  bread: '🍞', food: '🍽️', tea: '☕', fruit: '🍎', hair: '💇',
+  cow: '🐄', dog: '🐕', fish: '🐟', bird: '🐦', snake: '🐍', goat: '🐐',
+  hand: '✋', eye: '👁️', foot: '🦶', ear: '👂', nose: '👃', mouth: '👄',
+  head: '🧑', leg: '🦵', mother: '👩', father: '👨', brother: '👦',
+  sister: '👧', child: '🧒', friend: '🧑‍🤝‍🧑', village: '🏘️', home: '🏠',
+  name: '🏷️', i: '🙋', you: '👉', we: '👨‍👩‍👧', he: '👨', she: '👩',
+  my: '🎒', your: '🎁', our: '🏡', what: '❓', where: '📍', who: '❓',
+  sun: '☀️', moon: '🌙', tree: '🌳', mountain: '⛰️', rain: '🌧️', day: '📅',
+  night: '🌃', star: '⭐', river: '🌊', forest: '🌲', flower: '🌸',
+  stone: '🪨', fire: '🔥', earth: '🌍', sky: '🌤️', cloud: '☁️', leaf: '🍃',
+  red: '🔴', blue: '🔵', green: '🟢', yellow: '🟡', white: '⚪', black: '⚫',
+  come: '🏃', go: '🚶', eat: '🍽️', drink: '🥤', sleep: '😴', dance: '💃',
+  sing: '🎤', give: '🎁', happy: '😊', morning: '🌅', 'good morning': '🌅',
+  'how are you': '👋', 'who are you': '❓', 'come here': '👈',
+  'i eat rice': '🍚', 'i drink water': '💧', 'my name is ram': '🏷️',
+  today: '📅', tomorrow: '🔜', week: '🗓️', farmer: '🧑‍🌾', field: '🌾',
+  seed: '🌱', harvest: '🚜', crop: '🌾', festival: '🎉', drum: '🥁',
+  song: '🎵', music: '🎶', colours: '🎨', colors: '🎨', animals: '🐾',
+  numbers: '🔢', greetings: '👋', family: '👨‍👩‍👧', nature: '🌳',
+  actions: '🏃', sentences: '💬', phrases: '💬', time: '⏰', work: '🧑‍🌾',
+};
 
 function fisherYates(arr) {
   const a = [...arr]
@@ -116,6 +144,11 @@ export default function MatchPairs({ exercise, onCorrect, onWrong }) {
               transition={{ duration: 0.4 }}
               aria-pressed={selectedSource === source}
             >
+              {PAIR_EMOJI[String(source).toLowerCase()] && (
+                <span className="block text-2xl leading-none mb-0.5" aria-hidden="true">
+                  {PAIR_EMOJI[String(source).toLowerCase()]}
+                </span>
+              )}
               {source}
             </motion.button>
           ))}

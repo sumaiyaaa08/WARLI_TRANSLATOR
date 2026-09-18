@@ -39,9 +39,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 from ..config import settings
+from .fuzzy import get_fuzzy
 
 logger = logging.getLogger("warli.translation")
-
 
 # --------------------------------------------------------------------------
 # Data structures
@@ -57,6 +57,7 @@ class MappedToken:
     roman: Optional[str] = None
     is_postposition: bool = False
     inflected: bool = False  # True once a grammar affix has been attached
+    fuzzy_match: Optional[str] = None  # dictionary key used when no exact match existed
 
 
 @dataclass
@@ -209,6 +210,15 @@ class Dictionary:
     def all_entries(self) -> List[dict]:
         return list(self.entries)
 
+    def source_keys(self, lang: str) -> List[str]:
+        """All lookup keys (words + phrases) for a source language.
+
+        Used by the fuzzy layer to build its nearest-neighbor index.
+        """
+        keys = list(self._word_maps.get(lang, {}).keys())
+        keys.extend(self._phrase_maps.get(lang, {}).keys())
+        return keys
+
     def warli_pos(self, warli: str) -> Optional[str]:
         """Part of speech of a single-word Warli headword.
 
@@ -356,6 +366,12 @@ class RuleBasedTranslator(TranslationEngine):
             "warli": self.grammar,
             "santali": GrammarRules(settings.santali_grammar_path),
         }
+        # Fuzzy rescue layer (neural meaning + spelling). Warms its indexes in
+        # a background thread so boot and first requests never block on ML.
+        self._fuzzy = get_fuzzy()
+        if settings.fuzzy_enabled:
+            for d in self.dictionaries.values():
+                self._fuzzy.warm(d)
 
     #: Target languages selectable via translate(..., target_lang=...).
     TARGET_LANGS = ("warli", "santali")
@@ -370,6 +386,12 @@ class RuleBasedTranslator(TranslationEngine):
         for key, g in self.grammars.items():
             if key != "warli":
                 g.load()
+        # Dictionary content may have changed — drop stale fuzzy indexes.
+        try:
+            get_fuzzy().invalidate(self.dictionaries["warli"])
+            get_fuzzy().invalidate(self.dictionaries["santali"])
+        except Exception:
+            pass
 
     # -- language detection (very light heuristic; ASR usually tells us) -----
     @staticmethod
@@ -416,6 +438,13 @@ class RuleBasedTranslator(TranslationEngine):
         roman_tokens = [m.roman for m in mapped if m.roman]
         warli_roman = " ".join(roman_tokens) if roman_tokens else None
         unmatched = [m.source for m in mapped if not m.matched]
+        fuzzy_used = [(m.source, m.fuzzy_match) for m in mapped if m.fuzzy_match]
+
+        if fuzzy_used:
+            warnings.append(
+                "No exact match — closest meaning used: "
+                + ", ".join(f"'{s}' → '{k}'" for s, k in fuzzy_used[:6])
+            )
 
         if unmatched:
             warnings.append(
@@ -439,6 +468,22 @@ class RuleBasedTranslator(TranslationEngine):
         )
 
     # -------------------------------------------------------------- 1) lookup
+    def _fuzzy_lookup(self, dictionary: Dictionary, core: str, lang: str):
+        """Best-effort rescue for tokens with no exact match.
+
+        Returns (dictionary_key, method) or None. Gated on the feature flag;
+        never raises (a fuzzy failure must never break translation).
+        """
+        if not settings.fuzzy_enabled:
+            return None
+        if not core or not re.fullmatch(r"[A-Za-z\u0900-\u097F]+", core):
+            return None
+        try:
+            return self._fuzzy.suggest(dictionary, core, lang)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("Fuzzy lookup failed: %s", exc)
+            return None
+
     def _lookup(self, tokens: List[str], lang: str, warnings: List[str],
                 dictionary: Dictionary, grammar: GrammarRules) -> List[MappedToken]:
         mapped: List[MappedToken] = []
@@ -512,8 +557,23 @@ class RuleBasedTranslator(TranslationEngine):
                     )
                 )
             else:
-                # Passthrough (preserve punctuation), flagged unmatched.
-                mapped.append(MappedToken(source=token, warli=token, matched=False))
+                # No exact match: ask the fuzzy layer (neural meaning, then
+                # spelling) before giving up to passthrough.
+                fuzzy_hit = self._fuzzy_lookup(dictionary, core, lang) if core else None
+                if fuzzy_hit is not None:
+                    key, method, _score = fuzzy_hit
+                    entry = dictionary.lookup(key, lang)
+                    mapped.append(MappedToken(
+                        source=token,
+                        warli=str(entry[dictionary.word_key]),
+                        matched=True,
+                        pos=entry.get("pos"),
+                        roman=entry.get("roman"),
+                        fuzzy_match=f"{key} ({method})",
+                    ))
+                else:
+                    # Passthrough (preserve punctuation), flagged unmatched.
+                    mapped.append(MappedToken(source=token, warli=token, matched=False))
             i += 1
         return mapped
 

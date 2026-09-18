@@ -26,6 +26,13 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return default
+
+
 # backend/app/config.py -> backend/app -> backend -> project root
 _BACKEND_DIR = Path(__file__).resolve().parent.parent
 _PROJECT_ROOT = _BACKEND_DIR.parent
@@ -55,6 +62,17 @@ class Settings:
     # Swap "rule" for a future trained engine (e.g. "seq2seq") without touching
     # route handlers — see services/translation.py:build_engine().
     translation_engine: str = field(default_factory=lambda: os.getenv("WARLI_TRANSLATION_ENGINE", "rule"))
+
+    # --- Fuzzy lookup (neural semantic + spelling fallback) -------------------
+    # Rescues near-misses ("infant" -> "child") when exact lookup fails. The
+    # neural layer needs its model cached (Dockerfile pre-downloads it); without
+    # it, only the stdlib spelling layer runs. Every hit is flagged in warnings.
+    fuzzy_enabled: bool = field(default_factory=lambda: _env_bool("WARLI_FUZZY_ENABLED", True))
+    fuzzy_model: str = field(
+        default_factory=lambda: os.getenv(
+            "WARLI_FUZZY_MODEL", "paraphrase-multilingual-MiniLM-L12-v2"))
+    fuzzy_threshold: float = field(
+        default_factory=lambda: _env_float("WARLI_FUZZY_THRESHOLD", 0.60))
 
     # --- TTS (Warli text -> audio, Speech->Warli Speech mode) ----------------
     # NOTE: This is an APPROXIMATION. There is no Warli TTS model; we use a

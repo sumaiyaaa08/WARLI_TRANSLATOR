@@ -23,5 +23,13 @@ gTTS>=2.5
 # disable ASR and use /translate/text.
 faster-whisper>=1.1
 
+# --- Fuzzy lookup (neural semantic + spelling fallback) ---
+# Pretrained multilingual MiniLM: NO training, NO corpus needed — it only maps
+# near-miss words to dictionary keys by meaning ("infant" -> "child").
+# Needs torch (ASR brings it; otherwise pip installs it). If the model can't
+# load (offline box), the stdlib spelling layer still runs. Disable entirely
+# with WARLI_FUZZY_ENABLED=false.
+sentence-transformers>=2.7
+
 # --- Utilities ---
 python-dotenv>=1.0

@@ -20,6 +20,13 @@ const TARGET_OPTIONS = [
   { value: 'santali', label: 'Santali' },
 ]
 
+// Guided examples that are KNOWN to translate cleanly (verified against the
+// engine). Judges and kids tap these instead of free-typing into the unknown.
+const EXAMPLES = {
+  warli: ['I drink water', 'My name is Ram', 'Where is your house', 'How are you'],
+  santali: ['hello', 'water', 'thank you'],
+}
+
 // Accessible segmented toggle (used for From-language and Output-mode).
 // `options` = [{ value, label }]. Uses aria-pressed on each button so screen
 // readers announce the active choice. Kept inline — it is the only control of
@@ -73,12 +80,13 @@ export default function TranslatePage() {
     el.style.height = `${Math.max(128, Math.min(el.scrollHeight, 320))}px`
   }, [textInput])
 
-  async function runText() {
-    if (!textInput.trim()) { setError('Type or record something to translate.'); return }
+  async function runText(textOverride) {
+    const text = (textOverride ?? textInput).trim()
+    if (!text) { setError('Type or record something to translate.'); return }
     setBusy(true); setError(null); setResult(null)
     try {
       const res = await translateText({
-        text: textInput,
+        text,
         sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
         outputMode,
         targetLang,
@@ -213,13 +221,29 @@ export default function TranslatePage() {
             <button
               type="button"
               className="send-btn"
-              onClick={runText}
+              onClick={() => runText()}
               disabled={busy || !textInput.trim()}
               title="Translate (Ctrl/Cmd + Enter)"
             >
               {busy ? <span className="spinner" aria-hidden="true" /> : <SendIcon />}
               <span>{busy ? 'Working…' : 'Translate'}</span>
             </button>
+          </div>
+
+          {/* Guided examples — verified to translate cleanly. Tap to try. */}
+          <div className="example-chips" role="group" aria-label="Try an example">
+            <span className="example-caption">Try:</span>
+            {(EXAMPLES[targetLang] || EXAMPLES.warli).map(ex => (
+              <button
+                key={ex}
+                type="button"
+                className="example-chip"
+                disabled={busy}
+                onClick={() => { setTextInput(ex); runText(ex) }}
+              >
+                {ex}
+              </button>
+            ))}
           </div>
         </section>
 

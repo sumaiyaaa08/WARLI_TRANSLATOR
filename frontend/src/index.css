@@ -148,6 +148,36 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .status-dot.online { background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
 .status-bar .sep { opacity: 0.5; }
 
+/* Guided example chips under the composer (verified queries). */
+.example-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.example-caption {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.example-chip {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.example-chip:hover:not(:disabled) {
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+.example-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* Note under the composer when the Santali target pack is selected. */
 .target-note {
   margin: 10px 4px 0;

@@ -47,6 +47,12 @@ ARG ASR_MODEL=tiny
 RUN python -c "from faster_whisper import WhisperModel; WhisperModel('${ASR_MODEL}', device='cpu', compute_type='int8')" \
  || echo "ASR pre-download skipped (will fetch on first request instead)"
 
+# Pre-download the fuzzy-lookup embedding model (same ephemeral-disk reason).
+# Soft-fails the same way; without it, only the spelling fallback runs.
+ARG FUZZY_MODEL=paraphrase-multilingual-MiniLM-L12-v2
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('${FUZZY_MODEL}')" \
+ || echo "Fuzzy model pre-download skipped (spelling fallback still works)"
+
 # Render/other PaaS inject $PORT; default to 8000 for local `docker run`.
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --app-dir backend"]

@@ -43,10 +43,13 @@ Warli text (Devanagari)
 Warli speech audio
 ```
 
-The translation "model" is deliberately **not** a neural net. It is a data-driven
-**lookup + rule engine** with a **spelling-correction pass**, sitting behind a clean
-interface so it can later be swapped for a trained seq2seq model without touching
-the routes or the frontend.
+The translation "model" is deliberately **not a pure neural net**. It is a data-driven
+**lookup + rule engine** with spelling correction, plus a **frozen multilingual
+embedding layer** that rescues near-misses by meaning ("infant" → "child") and a
+stdlib spelling fallback ("watre" → "water") — no training, no corpus needed.
+Every fuzzy hit is flagged in response warnings, never silent. The engine sits
+behind a clean interface so it can later be swapped for a trained seq2seq model
+without touching the routes or the frontend.
 
 > **Marathi input.** Warli is a Marathi-family dialect, so the dictionary also indexes
 > each Warli headword as a Marathi key: a spoken Marathi word that matches shared core
@@ -318,10 +321,14 @@ Every lesson carries **trilingual instruction** (`prompt_en` / `prompt_hi` / `pr
 switchable in the navbar, persisted in localStorage), and sentence lessons carry
 **grammar tips** (`tip_en/hi/mr`, e.g. the SOV verb-last rule). Exercise types:
 `multiple_choice` (listen-and-choose with auto-playing audio, or letter naming
-with a giant display letter), `match_pairs` (tap-to-match), `listen_type`
+with a giant display letter), `match_pairs` (tap-to-match, English side shows
+picture emoji for pre-literate kids), `listen_type`
 (listen-and-type), and `teach` (intro cards that teach first — alphabet grids,
 joining rules — advancing free via "Got it"). Santali typing uses the built-in
-Ol Chiki on-screen keyboard, since no system keyboard ships it. Answers open an original
+Ol Chiki on-screen keyboard, since no system keyboard ships it.
+
+Run a classroom pilot with `PILOT.md` (weekend protocol, 10 kids, pre/post sheets)
+to produce honest learning-gain numbers for the deck. Answers open an original
 Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and an
 exit (✕) back to the map — a wrong answer can never strand the learner.
 
