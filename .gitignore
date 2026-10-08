@@ -23,7 +23,6 @@ dist/
 .vercel/
 .vercel-tmp/
 frontend/.vercel/
-
 # IDE-generated metadata / knowledge base
 .qoder/
 
@@ -45,6 +44,6 @@ data/voice_recording/*.mp3
 data/voice_recording/*.m4a
 data/pronunciation_audio/*.wav
 data/pronunciation_audio/*.mp3
-# Accounts + synced progress (runtime data with password hashes — never commit)
+# Accounts + synced progress (runtime data with password hashes - never commit)
 data/users.json
 .vercel

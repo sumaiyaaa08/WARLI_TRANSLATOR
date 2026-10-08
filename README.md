@@ -107,9 +107,10 @@ warliiii/
 ```
 
 > All dictionary / correction / pronunciation data lives in `data/` and is read at
-> runtime. The current content is clearly-labeled **seed/example** data (~2,203
-> dictionary entries) so the app runs immediately; replace it with the team's real
-> researched assets.
+> runtime. The current content is a working research lexicon (~2,203
+> dictionary entries, all single-word entries with explicit Marathi keys)
+> grounded in published Warli grammars (see data/research_papers/README.md);
+> entries are field-validation pending — confirm with native speakers.
 
 ---
 
@@ -159,7 +160,7 @@ warliiii/
 - **components/WarliArt.jsx** — the decorative Warli paintings as **inline SVG** (no image files): `WarliBackdrop`, `WarliBorder`, `WarliDivider`, `WarliMural`. **Edit motifs/scene here.**
 
 ### data/ — runtime assets (replace the seed data with real research)
-- **warli_dictionary/warli_dictionary.json** — English/Hindi → Warli entries (`warli`, `roman`, `en`, `hi`, `pos`, optional `example`/`tags`). The main lexicon (~2,203 seed entries). Add words here.
+- **warli_dictionary/warli_dictionary.json** — English/Hindi/Marathi → Warli entries (`warli`, `roman`, `en`, `hi`, `mr`, `pos`, optional `example`/`tags`). The main lexicon (~2,203 entries, all single-word entries with explicit `mr` keys). Add words here.
 - **warli_dictionary/grammar_rules.json** — Warli word order (SOV), the postposition map, function words, and inflection/aspect cues for `en`/`hi`/`mr`. Edit translation grammar here.
 - **voice_recording/corrections.json** — wrong→correct Warli spelling pairs learned from annotated recordings; applied by the spelling corrector.
 - **pronunciation_audio/lexicon.json** — optional `word → Devanagari respelling` map used by the pronunciation layer to improve the TTS approximation.

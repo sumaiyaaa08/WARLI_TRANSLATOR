@@ -261,9 +261,11 @@ export default function TranslatePage() {
         <footer className="app-footer">
           <WarliMural />
           <p className="footer-note">
-            Warli speech output is an approximation — a Marathi voice (closest available to Warli,
-            a Marathi-family language) reading Devanagari, nudged by an optional Warli pronunciation
-            layer. No true Warli TTS model exists yet.
+            Palghar-dialect Warli (Devanagari) · dictionary-backed translation, not AI
+            guessing — unknown words are flagged, never invented. Warli speech output
+            is an approximation — a Marathi voice (closest available to Warli, a
+            Marathi-family language) reading Devanagari, nudged by an optional Warli
+            pronunciation layer. No true Warli TTS model exists yet.
           </p>
         </footer>
       </div>

@@ -48,7 +48,7 @@ class TargetLanguage(str, Enum):
 # Requests
 # --------------------------------------------------------------------------
 class TextTranslateRequest(BaseModel):
-    text: str = Field(..., min_length=1, description="Source text in English or Hindi.")
+    text: str = Field(..., min_length=1, description="Source text in English, Hindi or Marathi.")
     source_lang: SourceLanguage = Field(
         SourceLanguage.en, description="Input language; 'auto' runs a light heuristic."
     )
@@ -126,6 +126,7 @@ class DictionaryEntry(BaseModel):
     roman: Optional[str] = None
     en: Optional[str] = None
     hi: Optional[str] = None
+    mr: Optional[str] = None
     pos: Optional[str] = None
     example: Optional[str] = None
     tags: List[str] = Field(default_factory=list)

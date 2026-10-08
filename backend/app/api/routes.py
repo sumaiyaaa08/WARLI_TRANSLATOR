@@ -234,11 +234,15 @@ def get_dictionary(
     needle = (q or "").strip().lower()
     entries: list[DictionaryEntry] = []
     for e in dictionary.all_entries():
-        if source_lang and source_lang.value in ("en", "hi", "mr") and not e.get(source_lang.value):
-            continue
+        if source_lang and source_lang.value in ("en", "hi", "mr"):
+            if not e.get(source_lang.value):
+                # 'mr' keys are often implicit (Warli headword = Marathi shared
+                # vocabulary), so don't exclude those entries from an mr filter.
+                if not (source_lang.value == "mr" and e.get(head_key)):
+                    continue
         if needle:
             haystack = " ".join(
-                str(e.get(k, "")).lower() for k in ("en", "hi", head_key, "roman")
+                str(e.get(k, "")).lower() for k in ("en", "hi", "mr", head_key, "roman")
             )
             if needle not in haystack:
                 continue
@@ -248,6 +252,7 @@ def get_dictionary(
                 roman=e.get("roman"),
                 en=e.get("en"),
                 hi=e.get("hi"),
+                mr=e.get("mr"),
                 pos=e.get("pos"),
                 example=e.get("example"),
                 tags=e.get("tags", []) or [],

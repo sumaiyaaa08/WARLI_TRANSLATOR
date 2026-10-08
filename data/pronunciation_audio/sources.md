@@ -30,6 +30,20 @@ lengths that Warli shares. Sources 3 and 4 below support this classification.
 | 3 | District culture portal | “Language — Palghar”, The Districts Project (last updated 22 Jul 2025) | https://indiandistricts.in/cultures/maharashtra/palghar/language/ | Public web | Sound-pattern tables, kinship terms, case markers |
 | 4 | Encyclopedia | “Varli language”, Wikipedia | https://en.wikipedia.org/wiki/Varli_language | CC BY-SA 3.0 | Confirms Varli/Warli is Indo-Aryan, classified as Marathi |
 
+## Verified native-audio sources (transcribe these first)
+
+These contain REAL spoken Varli (not painting tutorials — YouTube search for
+"Warli language" is ~95% painting videos, verified Oct 2026):
+
+- Global Recordings Network, Varli `vav` — "Good News" (41 min), "Meeting the
+  Creator God", "Words of Life" + downloadable MP3 ZIPs + YouTube playlist
+  `PL-5yEg0Ecc2ipEvWOwr9Z3TqFBYsHZGph` — https://globalrecordings.net/en/language/vav
+- Jesus Film in Varli (full feature-length native audio) —
+  https://www.jesusfilm.org/watch/jesus.html/varli.html
+- PARI Endangered Languages Project: primary teacher Bhalchandra Dhangare
+  (Mokhada, Palghar) teaching in Warli — closest classroom footage of the
+  Palghar dialect this app standardizes on.
+
 ## Candidate audio sources (to review & verify — not yet transcribed)
 
 The respellings above come from published descriptions, not yet from a native

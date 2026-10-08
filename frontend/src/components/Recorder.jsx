@@ -40,8 +40,9 @@ export default function Recorder({ onCapture, disabled }) {
 
   // Pick a supported mime type (codecs differ across browsers).
   function pickMimeType() {
-    const candidates = ['audio/webm', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4']
-    return candidates.find((t) => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || ''
+    if (!window.MediaRecorder) return ''
+    const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
+    return candidates.find((t) => window.MediaRecorder.isTypeSupported(t)) || ''
   }
 
   async function startRecording() {
@@ -53,25 +54,48 @@ export default function Recorder({ onCapture, disabled }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
+      if (!window.MediaRecorder) {
+        stream.getTracks().forEach((t) => t.stop())
+        setError('Recording is not supported in this browser — use upload')
+        return
+      }
       const mimeType = pickMimeType()
       const mr = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
       mediaRecorderRef.current = mr
       chunksRef.current = []
 
       mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      mr.onerror = () => {
+        setError('The microphone recording failed — please try again or use upload')
+        setRecording(false)
+        setStatus('Recording failed')
+        stream.getTracks().forEach((t) => t.stop())
+        streamRef.current = null
+        mediaRecorderRef.current = null
+      }
       mr.onstop = () => {
         const type = mr.mimeType || mimeType || 'audio/webm'
         const blob = new Blob(chunksRef.current, { type })
         const ext = type.includes('mp4') ? 'mp4' : type.includes('ogg') ? 'ogg' : 'webm'
-        if (blob.size > 0) onCapture(blob, `recording.${ext}`)
+        if (blob.size > 0) {
+          onCapture(blob, `recording.${ext}`)
+        } else {
+          setError('No audio was captured — check microphone permission and try again')
+          setStatus('Recording was empty')
+        }
         stream.getTracks().forEach((t) => t.stop())
         streamRef.current = null
+        mediaRecorderRef.current = null
       }
 
-      mr.start()
+      // A timeslice makes browsers emit usable chunks even when stop() happens
+      // immediately after a short recording.
+      mr.start(250)
       setRecording(true)
       setStatus('Recording… tap to stop')
     } catch (err) {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
       setError(err?.message || 'Could not access the microphone')
       setStatus('Microphone unavailable')
     }

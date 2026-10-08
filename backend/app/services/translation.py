@@ -155,7 +155,6 @@ class Dictionary:
                     for variant in self._english_verb_variants(norm):
                         self._word_maps[lang].setdefault(variant, entry)
             # Cognate map (Warli only): index an explicit gloss when present, PLUS
-            # the headword itself. Warli is a Marathi-family dialect, so a spoken
             # Marathi word that equals a Warli headword resolves to that entry (its
             # translation is the same word) — correct for the large shared core
             # vocabulary; anything unmatched still passes through in readable
@@ -193,6 +192,17 @@ class Dictionary:
             variants.update({f"{word}s", f"{word}d", f"{word[:-1]}ing"})
         else:
             variants.update({f"{word}s", f"{word}es", f"{word}ed", f"{word}ing"})
+            # Consonant doubling for CVC verbs (run->running, sit->sitting,
+            # swim->swimming, cut->cutting, stop->stopping): without these the
+            # -ing form falls through to a verbal-noun entry (pos=noun) or to
+            # no match, and the reorderer then strands the verb mid-sentence.
+            if (
+                len(word) > 2
+                and word[-1] not in "aeiouwxy"
+                and word[-2] in "aeiou"
+                and word[-3] not in "aeiou"
+            ):
+                variants.update({f"{word}{word[-1]}ing", f"{word}{word[-1]}ed"})
         return variants - {word}
 
     def __len__(self) -> int:
@@ -394,10 +404,39 @@ class RuleBasedTranslator(TranslationEngine):
             pass
 
     # -- language detection (very light heuristic; ASR usually tells us) -----
-    @staticmethod
-    def detect_lang(text: str) -> str:
-        # Any Devanagari codepoint -> Hindi, else English.
-        return "hi" if re.search(r"[\u0900-\u097F]", text or "") else "en"
+    # Devanagari is shared by Hindi AND Marathi. Check Marathi markers first
+    # (letter ळ, copulas आहे/होता, pronouns मी/माझा, postpositions मध्ये/
+    # पासून/साठी) so Marathi input is labelled "mr"; other Devanagari -> "hi".
+    _MR_MARKERS = frozenset({
+        "आहे", "आहेस", "आहोत", "आहात", "आहेत", "होता", "होती", "होते",
+        "होतं", "होतो", "असेल", "असतील", "मी", "माझा", "माझी", "माझे",
+        "तुझा", "तुझी", "तुझे", "आम्ही", "तुम्ही", "नाही", "नको",
+        "मध्ये", "पासून", "साठी", "मुलगा", "मुलगी", "माणूस",
+    })
+
+    @classmethod
+    def detect_lang(cls, text: str) -> str:
+        if not re.search(r"[\u0900-\u097F]", text or ""):
+            return "en"
+        if "ळ" in (text or ""):
+            return "mr"
+        words = {w.strip(" \"'()[]!?.,;:").lower() for w in (text or "").split()}
+        if words & cls._MR_MARKERS:
+            return "mr"
+        return "hi"
+
+    # Devanagari varieties share one script: when the caller asks for Hindi or
+    # Marathi (including auto-detected Hindi), consult the other map as well so
+    # a Marathi word typed under auto/Hindi still resolves, and vice versa.
+    _DEVANAGARI_FALLBACK = {"hi": "mr", "mr": "hi"}
+
+    def _lookup_entry(self, dictionary: Dictionary, span: str, lang: str) -> Optional[dict]:
+        entry = dictionary.lookup(span, lang)
+        if entry is None:
+            fallback = self._DEVANAGARI_FALLBACK.get(lang)
+            if fallback:
+                entry = dictionary.lookup(span, fallback)
+        return entry
 
     # ------------------------------------------------------------------ main
     def translate(self, text: str, source_lang: str = "en", target_lang: str = "warli") -> TranslationResult:
@@ -489,6 +528,13 @@ class RuleBasedTranslator(TranslationEngine):
         mapped: List[MappedToken] = []
         postpositions = grammar.postpositions(lang)
         function_words = grammar.function_words(lang)
+        if lang in self._DEVANAGARI_FALLBACK:
+            # Hindi and Marathi share Devanagari: merge the sibling sets so a
+            # Marathi copula/postposition typed under auto(=hi) still drops or
+            # maps correctly, and vice versa. English stays strictly separate.
+            sibling = self._DEVANAGARI_FALLBACK[lang]
+            function_words = function_words | grammar.function_words(sibling)
+            postpositions = {**grammar.postpositions(sibling), **postpositions}
         i = 0
         n = len(tokens)
         while i < n:
@@ -503,7 +549,7 @@ class RuleBasedTranslator(TranslationEngine):
                     if core:
                         core_words.append(core)
                 norm_span = " ".join(core_words).lower()
-                entry = dictionary.lookup(norm_span, lang)
+                entry = self._lookup_entry(dictionary, norm_span, lang)
                 if entry:
                     lead, _, trail = _strip_punct(tokens[i])
                     last_lead, _, last_trail = _strip_punct(tokens[i + length - 1])
@@ -534,7 +580,7 @@ class RuleBasedTranslator(TranslationEngine):
             if core and core.lower() in function_words:
                 i += 1
                 continue
-            entry = dictionary.lookup(core, lang) if core else None
+            entry = self._lookup_entry(dictionary, core, lang) if core else None
             if entry:
                 mapped.append(
                     MappedToken(
@@ -610,6 +656,31 @@ class RuleBasedTranslator(TranslationEngine):
             is_pred = [self._is_predicate(m, dictionary) for m in result]
             preds = [m for m, p in zip(result, is_pred) if p]
             others = [m for m, p in zip(result, is_pred) if not p]
+            # English uses prepositions ("to the child") but Warli uses
+            # postpositions ("पोर कडे" — child-to). For English input only
+            # (Hindi/Marathi already place them after the noun), move each
+            # postposition token after the next non-predicate token.
+            if lang == "en":
+                moved: List[MappedToken] = []
+                pending: List[MappedToken] = []
+                # Source words that are relational in English (keys of the en
+                # postposition map) count as postpositional even when they
+                # resolved via the dictionary under another pos (e.g. "under"
+                # stored as an adverb still means "झाड खाली", tree-under).
+                relational = {str(k).lower() for k in grammar.postpositions("en")}
+                for m in others:
+                    _, src_core, _ = _strip_punct(m.source)
+                    # pos == "post" covers relational words that resolved via
+                    # the dictionary (e.g. "to" -> "कडे") rather than the
+                    # postposition map, which never sets is_postposition.
+                    if m.is_postposition or m.pos == "post" or src_core.lower() in relational:
+                        pending.append(m)
+                    else:
+                        moved.append(m)
+                        moved.extend(pending)
+                        pending = []
+                moved.extend(pending)
+                others = moved
             # Only reorder if a predicate appears before a non-predicate (SVO-ish).
             if preds and others:
                 first_pred_idx = is_pred.index(True)
@@ -618,6 +689,15 @@ class RuleBasedTranslator(TranslationEngine):
                 )
                 if first_pred_idx < last_other_idx:
                     result = others + preds
+                else:
+                    # Predicate already final, but the postposition fix above
+                    # may still have reordered `others` — write it back.
+                    it = iter(others)
+                    result = [next(it) if not p else m for m, p in zip(result, is_pred)]
+            elif others:
+                # No predicate at all (e.g. a mistagged verb): the postposition
+                # fix may still have reordered everything.
+                result = others
 
         # 2b) Inflection: detect source cues (is/are/am, was/were, will, not...)
         #     and attach the matching affix to the LAST eligible token.
@@ -625,8 +705,13 @@ class RuleBasedTranslator(TranslationEngine):
         #     everything else is appended (future -> "कर" + "ईल" = "करईल").
         #     Deliberately simple; refine against the research papers.
         lowered = [t.lower() for t in tokens] if lang == "en" else list(tokens)
+        sibling_cue_lang = self._DEVANAGARI_FALLBACK.get(lang)
         for rule in grammar.cue_rules:
             cues = [str(c).lower() for c in (rule.get(f"match_any_{lang}") or [])]
+            if sibling_cue_lang:
+                # A Devanagari cue (e.g. Marathi आहे under auto-detected Hindi)
+                # must still trigger the matching inflection.
+                cues += [str(c).lower() for c in (rule.get(f"match_any_{sibling_cue_lang}") or [])]
             if not any(c in lowered for c in cues):
                 continue
             affix_key = str(rule.get("apply") or "")
