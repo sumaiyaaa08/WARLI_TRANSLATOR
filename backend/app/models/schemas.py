@@ -33,15 +33,9 @@ class OutputMode(str, Enum):
 
 
 class TargetLanguage(str, Enum):
-    """Supported *output* languages (what the user learns).
-
-    Warli is the full pack (dictionary + rules + voice approximation).
-    Santali (Jharkhand, Ol Chiki script) is the seed pack v0: dictionary
-    lookup only, text output only — no voice exists yet.
-    """
+    """Output language. Warli (Devanagari, Palghar dialect) is the only target."""
 
     warli = "warli"
-    santali = "santali"
 
 
 # --------------------------------------------------------------------------
@@ -56,7 +50,7 @@ class TextTranslateRequest(BaseModel):
         OutputMode.text, description="'speech' also returns synthesized Warli audio."
     )
     target_lang: TargetLanguage = Field(
-        TargetLanguage.warli, description="Output language: 'warli' (full pack) or 'santali' (seed pack, text only)."
+        TargetLanguage.warli, description="Output language: 'warli'."
     )
 
 
@@ -104,8 +98,8 @@ class TranslationResponse(BaseModel):
     target_lang: TargetLanguage = TargetLanguage.warli
     warli_text: str
     warli_roman: Optional[str] = None
-    # `translated_text` mirrors `warli_text` for non-Warli targets (e.g. Santali);
-    # `warli_text` is kept populated for backward compatibility.
+    # `translated_text` / `target_roman` mirror the Warli fields for
+    # forward compatibility with API clients.
     translated_text: Optional[str] = None
     target_roman: Optional[str] = None
     engine: str
@@ -144,7 +138,6 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     translation_engine: str
     dictionary_entries: int
-    santali_entries: int = 0
     correction_pairs: int
     pronunciation_entries: int
     asr_enabled: bool
@@ -154,7 +147,6 @@ class HealthResponse(BaseModel):
 class ReloadResponse(BaseModel):
     status: str = "reloaded"
     dictionary_entries: int
-    santali_entries: int = 0
     correction_pairs: int
     pronunciation_entries: int
 

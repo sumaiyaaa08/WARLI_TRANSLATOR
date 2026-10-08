@@ -52,9 +52,7 @@ def _result_to_response(
         source_lang=SourceLanguage(result.source_lang)
         if result.source_lang in ("en", "hi", "mr")
         else SourceLanguage.auto,
-        target_lang=TargetLanguage(result.target_lang)
-        if result.target_lang in ("warli", "santali")
-        else TargetLanguage.warli,
+        target_lang=TargetLanguage.warli,
         warli_text=result.warli_text,
         warli_roman=result.warli_roman,
         translated_text=result.warli_text,
@@ -82,36 +80,13 @@ def _result_to_response(
 
 def _maybe_synthesize(warli_text: str, output_mode: OutputMode,
                       target_lang: str = "warli"):
-    """If speech output is requested, synthesize audio.
+    """If speech output is requested, synthesize Warli audio (approximation).
 
-    Warli: Marathi voice reading Devanagari (approximation). Santali: Ol Chiki
-    is first transliterated to Devanagari, then read by the same voice (double
-    approximation — flagged in the note). No Santali voice model exists.
+    A Marathi voice reads the Devanagari Warli text — flagged in the note.
+    No true Warli voice model exists.
     """
     if output_mode != OutputMode.speech or not warli_text:
         return None, None, None
-    if target_lang != "warli":
-        from ..services.transliterate import transliterate_olchiki
-        try:
-            spoken = transliterate_olchiki(warli_text)
-            tts_result = get_tts().synthesize(spoken, apply_pronunciation=False)
-        except TTSError as exc:
-            logger.warning("Santali TTS failed: %s", exc)
-            meta = TTSMeta(
-                generated=False, approximation=True, voice_lang=None,
-                pronunciation_layer_applied=False, note=str(exc),
-            )
-            return None, None, meta
-        meta = TTSMeta(
-            generated=True,
-            approximation=True,
-            voice_lang=tts_result.voice_lang,
-            pronunciation_layer_applied=False,
-            note=("Santali speech is an approximation: Ol Chiki transliterated to "
-                  "Devanagari and read by a Marathi voice — no Santali voice "
-                  "model exists."),
-        )
-        return tts_result.audio_bytes, tts_result.mime, meta
     try:
         tts_result = get_tts().synthesize(warli_text)
     except TTSError as exc:
@@ -217,13 +192,12 @@ async def translate_speech(
     summary="Browse/search the Warli dictionary (admin & debug).",
 )
 def get_dictionary(
-    q: str | None = Query(None, description="Substring filter across en/hi/headword/roman."),
+    q: str | None = Query(None, description="Substring filter across en/hi/mr/warli/roman."),
     source_lang: SourceLanguage | None = Query(None, description="Restrict to entries with this key."),
-    target_lang: TargetLanguage = Query(TargetLanguage.warli, description="Which dictionary: 'warli' or 'santali'."),
     limit: int = Query(200, ge=1, le=2000),
 ) -> DictionaryResponse:
     engine = get_engine()
-    dictionary = getattr(engine, "dictionaries", {}).get(target_lang.value) or getattr(engine, "dictionary", None)
+    dictionary = getattr(engine, "dictionary", None)
     if dictionary is None:
         raise HTTPException(
             status.HTTP_501_NOT_IMPLEMENTED,
@@ -261,7 +235,7 @@ def get_dictionary(
         if len(entries) >= limit:
             break
 
-    return DictionaryResponse(count=len(entries), q=q, source_lang=source_lang.value if source_lang else None, target_lang=target_lang.value, entries=entries)
+    return DictionaryResponse(count=len(entries), q=q, source_lang=source_lang.value if source_lang else None, target_lang="warli", entries=entries)
 
 
 # --------------------------------------------------------------------------
@@ -273,12 +247,10 @@ def health() -> HealthResponse:
     dictionary = getattr(engine, "dictionary", None)
     corrector = getattr(engine, "corrector", None)
     layer = get_pronunciation_layer()
-    santali = getattr(engine, "dictionaries", {}).get("santali")
     return HealthResponse(
         status="ok",
         translation_engine=engine.name,
         dictionary_entries=len(dictionary) if dictionary is not None else 0,
-        santali_entries=len(santali) if santali is not None else 0,
         correction_pairs=len(corrector) if corrector is not None else 0,
         pronunciation_entries=len(layer),
         asr_enabled=settings.asr_enabled,
@@ -298,11 +270,9 @@ def admin_reload() -> ReloadResponse:
     layer = reload_pronunciation_layer()
     dictionary = getattr(engine, "dictionary", None)
     corrector = getattr(engine, "corrector", None)
-    santali = getattr(engine, "dictionaries", {}).get("santali")
     return ReloadResponse(
         status="reloaded",
         dictionary_entries=len(dictionary) if dictionary is not None else 0,
-        santali_entries=len(santali) if santali is not None else 0,
         correction_pairs=len(corrector) if corrector is not None else 0,
         pronunciation_entries=len(layer),
     )

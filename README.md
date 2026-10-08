@@ -1,17 +1,9 @@
-# Linguify — Translator + Learning App (Warli & Santali)
+# Warli Speech Translator
 
-Two apps, one server, one origin:
+One app, one server, one origin:
 
-1. **Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
-   (Varli, Devanagari) text, with optional spoken output — or get **Santali**
-   (Ol Chiki, Jharkhand) text via the seed pack (text only, no voice yet).
-2. **Learning app** — a gamified course starting with **Santali first**
-   (Ol Chiki script → tiny words → everyday talk, then 15 Warli lessons:
-   23 lessons in 8 units, 123 exercises, trilingual EN/HI/MR instruction),
-   learner **accounts** with cloud
-   progress sync, a searchable **wordbook** over
-   the full dictionaries with tap-to-hear pronunciation, and a
-   **teacher dashboard** with class analytics.
+**Translator** — type or speak **English / Hindi / Marathi**, get **Warli**
+(Varli, Devanagari, Palghar dialect) text, with optional spoken output.
 
 A single Docker image (root `Dockerfile`) builds the React
 app and runs the FastAPI backend, which serves the JSON API under `/api` **and** the UI
@@ -77,34 +69,27 @@ warliiii/
 │       ├── __init__.py
 │       ├── main.py               # entrypoint: mounts /api routes AND serves frontend/dist at /
 │       ├── config.py             # settings + feature flags + paths (incl. api_prefix, frontend_dist)
-│       ├── api/       (__init__.py, routes.py, learning_routes.py, auth_routes.py, errors.py)
-│       ├── models/    (__init__.py, schemas.py, learning_schemas.py, auth_schemas.py)
-│       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py, learning_service.py, auth_service.py)
-│
-├── frontend/                     ← React + Vite SPA (built into dist/, then served by FastAPI)
-│   ├── index.html
-│   ├── package.json / package-lock.json
-│   ├── vite.config.js
-│   ├── .env.example / .gitignore
-│   └── src/
-│       ├── main.jsx              # React entrypoint + routes (/, /lesson/:id, /words, /teacher, /translate)
-│       ├── index.css             # the entire design system / theming (+ Tailwind)
-│       ├── api/        (client.js, learning.js)
-│       ├── context/    (AuthContext.jsx — session; ProgressContext.jsx — stars/streak/hearts/language + cloud sync)
-│       ├── components/ (Recorder, ResultPanel [incl. the audio player], WarliArt)
-│       ├── components/learn/ (LearningMap, LessonNode, ExerciseCard, MultipleChoice,
-│       │                      MatchPairs, ListenType, AnswerCard [Guru Card], MascotHint,
-│       │                      ProgressBar, HeartIndicator, XpBurst, LanguageSwitcher)
-│       ├── components/layout/ (Navbar, GameHeader)
-│       └── pages/      (LearnPage, LessonPlayer, WordsPage, LoginPage, TeacherDashboard, TranslatePage)
-│
-└── data/                         ← runtime data assets (read from disk; nothing hardcoded)
-    ├── warli_dictionary/    (warli_dictionary.json, grammar_rules.json, README.md)
-    ├── voice_recording/     (corrections.json, README.md)
-    ├── pronunciation_audio/ (lexicon.json, transcriptions.csv, sources.md, README.md, clips/)
-    ├── pedagogy/            (curriculum.json, mock_classroom.json, lessons/lesson_001…015.json)
-    └── research_papers/     (README.md — drop reference PDFs here)
-```
+  │       ├── api/       (__init__.py, routes.py, errors.py)
+  │       ├── models/    (__init__.py, schemas.py)
+  │       └── services/  (__init__.py, asr.py, translation.py, tts.py, pronunciation.py, fuzzy.py)
+  │
+  ├── frontend/                     ← React + Vite SPA (built into dist/, then served by FastAPI)
+  │   ├── index.html
+  │   ├── package.json / package-lock.json
+  │   ├── vite.config.js
+  │   ├── .env.example / .gitignore
+  │   └── src/
+  │       ├── main.jsx              # React entrypoint (mounts <TranslatePage/> at /)
+  │       ├── index.css             # the entire design system / theming
+  │       ├── api/        (client.js — translateText / translateSpeech / getHealth)
+  │       └── components/ + pages/ (Recorder, ResultPanel [incl. the audio player], WarliArt, TranslatePage)
+  │
+  └── data/                         ← runtime data assets (read from disk; nothing hardcoded)
+      ├── warli_dictionary/    (warli_dictionary.json, grammar_rules.json, README.md)
+      ├── voice_recording/     (corrections.json, README.md)
+      ├── pronunciation_audio/ (lexicon.json, transcriptions.csv, sources.md, README.md, clips/)
+      └── research_papers/     (README.md, SOURCES.md — reference PDFs go here)
+  ```
 
 > All dictionary / correction / pronunciation data lives in `data/` and is read at
 > runtime. The current content is a working research lexicon (~2,203
@@ -273,104 +258,15 @@ The UI is served at `GET /`; every JSON endpoint lives under `/api`.
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/translate/text` | `{text, source_lang, output_mode, target_lang}` → target text (+ base64 audio if `speech` + Warli) |
-| `POST` | `/api/translate/speech` | multipart `audio` file + `source_lang` + `output_mode` + `target_lang` → target text (+ audio if Warli) |
-| `GET` | `/api/dictionary` | admin/debug lookup; `?q=`, `?source_lang=`, `?target_lang=warli\|santali`, `?limit=` |
+| `POST` | `/api/translate/text` | `{text, source_lang, output_mode}` → Warli text (+ base64 audio if `speech`) |
+| `POST` | `/api/translate/speech` | multipart `audio` file + `source_lang` + `output_mode` → Warli text (+ audio) |
+| `GET` | `/api/dictionary` | admin/debug lookup; `?q=`, `?source_lang=`, `?limit=` |
 | `GET` | `/api/health` | status + data counts (dictionary / corrections / pronunciation) |
 | `POST` | `/api/admin/reload` | re-read all data files from disk without restarting |
 
 `source_lang` accepts `en`, `hi`, `mr`, or `auto`. Errors always return
 `{ "error": "<code>", "detail": "<message>" }` with a proper HTTP status (e.g. `415`
 unsupported audio format, `413` too large, `422` validation, `400` no speech detected).
-
-### Learning endpoints (`/api/learning/*`)
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/learning/path` | full curriculum (4 units, 12 lessons) with inlined summaries |
-| `GET` | `/api/learning/lesson/{id}` | one lesson with all exercises (incl. trilingual prompts + tips) |
-| `POST` | `/api/learning/hint` | `{prompt_en, correct_answer, source_lang}` → child-friendly hint (never 5xx) |
-| `GET` | `/api/learning/pronounce?word=` | single Warli word → base64 MP3 (same approximation notice as TTS) |
-| `GET` | `/api/learning/classroom` | mock classroom data + avg XP for the teacher dashboard |
-| `POST` | `/api/auth/signup` | `{username, password, display_name?}` → `{token, user}` (201; 400 if taken) |
-| `POST` | `/api/auth/login` | `{username, password}` → `{token, user}` (401 if wrong) |
-| `POST` | `/api/auth/logout` | invalidate the bearer token |
-| `GET` | `/api/auth/me` | current account + synced progress (bearer) |
-| `GET/POST` | `/api/auth/progress` | fetch / save `{xp, streak, hearts, completed_lessons, uiLang, lastPlayedDate}` (bearer) |
-| `GET` | `/api/auth/students` | public learner roster + progress for the teacher dashboard |
-
----
-
-## Learning app (Warli Seekho)
-
-The course lives in `data/pedagogy/`: `curriculum.json` (units → lesson IDs) plus one
-file per lesson under `lessons/`. v6 ships **23 lessons in 8 units, 123 exercises**,
-**Santali first**:
-
-| Unit | Lessons |
-|---|---|
-| Ol Chiki Script | Meet the Vowels · First/More/Last Consonants |
-| Tiny Words | Two-Letter · Three-Letter Words |
-| Everyday Santali | Johar! First Words · Around Me |
-| First Words | Greetings · Numbers 1-5 · You & Me |
-| The World Around Us | Body Parts · Animals · Nature |
-| Daily Life | Colours · Food & Water · Family |
-| Speak Warli | Actions · First Sentences · Daily Phrases |
-| Village Life | Time & Days · Work & Farm · Celebration |
-
-Every lesson carries **trilingual instruction** (`prompt_en` / `prompt_hi` / `prompt_mr`,
-switchable in the navbar, persisted in localStorage), and sentence lessons carry
-**grammar tips** (`tip_en/hi/mr`, e.g. the SOV verb-last rule). Exercise types:
-`multiple_choice` (listen-and-choose with auto-playing audio, or letter naming
-with a giant display letter), `match_pairs` (tap-to-match, English side shows
-picture emoji for pre-literate kids), `listen_type`
-(listen-and-type), and `teach` (intro cards that teach first — alphabet grids,
-joining rules — advancing free via "Got it"). Santali typing uses the built-in
-Ol Chiki on-screen keyboard, since no system keyboard ships it.
-
-Run a classroom pilot with `PILOT.md` (weekend protocol, 10 kids, pre/post sheets)
-to produce honest learning-gain numbers for the deck. Answers open an original
-Warli-framed **Guru Card** with the correct word, Next / Try-again actions, and an
-exit (✕) back to the map — a wrong answer can never strand the learner.
-
-Beyond lessons: **`/words`** is a searchable wordbook over the entire 2,203-word
-Warli dictionary (tap 🔊 to hear any word) **plus the 744-word Santali pack**
-(text only), and **`/teacher`** is a classroom dashboard
-(KPIs, score chart, struggle areas, student table) fed by `mock_classroom.json`.
-Progress (stars, streak, hearts, completed lessons, language) persists in
-localStorage; hearts/streak roll over daily.
-
-### Santali pack (Jharkhand)
-
-The engine supports two target languages via `target_lang` (`warli` default,
-`santali`). The Santali seed pack (`data/santali_dictionary/`, 744 entries in Ol
-Chiki script + a grammar stub) is merged from CC-BY-SA open sources — see
-`santali_dictionary/SOURCES.md` for credits. The course opens with a Santali
-unit (Johar! — lessons 016–017); hints and audio follow each exercise's
-`target_lang`. **Santali voice**: Ol Chiki is transliterated to Devanagari
-(`services/transliterate.py`, verified against the official UDHR Santali text)
-and read by the Marathi voice — a flagged double approximation, since no
-Santali voice model exists. The course lessons beyond the Santali unit remain
-Warli; adding a Santali course unit = new `lessons/*.json` files, no code
-changes — the same pattern that will carry Mundari/Ho next.
-
-### Learner accounts (progress tracking)
-
-Learners can **sign up / log in** (`/login`) with a username + password. While logged
-in, the app pulls the account record on login (keeping whichever side learned more)
-and pushes every change (debounced); the header dot shows grey (device-only), amber
-(syncing), green (synced) or red (failed, retries automatically). Teachers see every
-registered learner's stars, streak, lessons completed and last-active date in the
-**Registered learners (live)** panel on `/teacher`.
-
-Auth is deliberately **demo-grade**: salted pbkdf2 hashes + opaque bearer tokens in
-`data/users.json` (gitignored, never committed). Two honest limits for the report:
-(1) no rate-limiting/email recovery — swap in a real user DB for production; (2) on
-free-tier hosts **without a persistent disk, `users.json` resets on redeploy** — mount
-a disk at the data dir (or set `WARLI_USERS_FILE`) for real classes.
-
-To add a lesson: drop `lessons/lesson_016.json` (same schema), list it in
-`curriculum.json`, then `POST /api/admin/reload` — no code change, no restart.
 
 ---
 

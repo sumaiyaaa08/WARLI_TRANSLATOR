@@ -105,15 +105,15 @@ class Dictionary:
     Two source languages are supported (English + Hindi). Phrase keys (multi-word)
     are stored separately from single-word keys so we can do greedy longest-match.
 
-    `word_key` names the target-language headword field in each entry ("warli"
-    for Warli, "santali" for Santali). `cognate_key`, when given, indexes an
+    `word_key` names the target-language headword field in each entry
+    ("warli" for Warli). `cognate_key`, when given, indexes an
     extra source map from same-family words (Warli uses "mr": Warli is a
     Marathi-family dialect, so spoken Marathi that equals a Warli headword
     resolves directly).
     """
 
     MAX_PHRASE_WORDS = 4
-    TARGET_HEADWORDS = ("warli", "santali")
+    TARGET_HEADWORDS = ("warli",)
 
     def __init__(self, path: Path, word_key: str = "warli", cognate_key: Optional[str] = "mr"):
         self.path = path
@@ -158,8 +158,7 @@ class Dictionary:
             # Marathi word that equals a Warli headword resolves to that entry (its
             # translation is the same word) — correct for the large shared core
             # vocabulary; anything unmatched still passes through in readable
-            # Devanagari. First entry wins for collisions. Santali has no cognate
-            # map: its Ol Chiki headwords never collide with source languages.
+            # Devanagari. First entry wins for collisions.
             cognate_keys = ([entry.get(self.cognate_key)] if self.cognate_key else []) + [headword]
             for key in cognate_keys:
                 if not key:
@@ -364,17 +363,14 @@ class RuleBasedTranslator(TranslationEngine):
         self.dictionary = Dictionary(settings.dictionary_path)
         self.grammar = GrammarRules(settings.grammar_rules_path)
         self.corrector = SpellingCorrector(settings.corrections_path)
-        # Extra target languages. self.dictionary / self.grammar stay the Warli
-        # pair so existing callers (health, /dictionary, hint) keep working.
+        # Extra target languages can be added here; self.dictionary /
+        # self.grammar stay the Warli pair so existing callers (health,
+        # /dictionary) keep working.
         self.dictionaries: Dict[str, Dictionary] = {
             "warli": self.dictionary,
-            "santali": Dictionary(
-                settings.santali_dictionary_path, word_key="santali", cognate_key=None
-            ),
         }
         self.grammars: Dict[str, GrammarRules] = {
             "warli": self.grammar,
-            "santali": GrammarRules(settings.santali_grammar_path),
         }
         # Fuzzy rescue layer (neural meaning + spelling). Warms its indexes in
         # a background thread so boot and first requests never block on ML.
@@ -384,7 +380,7 @@ class RuleBasedTranslator(TranslationEngine):
                 self._fuzzy.warm(d)
 
     #: Target languages selectable via translate(..., target_lang=...).
-    TARGET_LANGS = ("warli", "santali")
+    TARGET_LANGS = ("warli",)
 
     def reload(self) -> None:
         self.dictionary.load()
@@ -399,7 +395,6 @@ class RuleBasedTranslator(TranslationEngine):
         # Dictionary content may have changed — drop stale fuzzy indexes.
         try:
             get_fuzzy().invalidate(self.dictionaries["warli"])
-            get_fuzzy().invalidate(self.dictionaries["santali"])
         except Exception:
             pass
 
@@ -464,8 +459,7 @@ class RuleBasedTranslator(TranslationEngine):
         # 2) GRAMMAR RULES (reorder + inflection)
         mapped = self._apply_grammar(mapped, tokens, lang, grammar, dictionary)
 
-        # 3) SPELLING CORRECTION / normalization (Warli correction table only;
-        #    Santali Ol Chiki never matches Devanagari pairs, so skip it there).
+        # 3) SPELLING CORRECTION / normalization (Warli correction table).
         if target_lang == "warli":
             mapped, corrections = self._apply_corrections(mapped)
         else:

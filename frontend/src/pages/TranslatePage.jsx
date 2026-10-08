@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import Navbar from '../components/layout/Navbar'
 import Recorder from '../components/Recorder'
 import ResultPanel from '../components/ResultPanel'
 import { WarliBackdrop, WarliBorder, WarliDivider, WarliMural } from '../components/WarliArt'
@@ -15,17 +14,10 @@ const MODE_OPTIONS = [
   { value: 'text', label: 'Text' },
   { value: 'speech', label: 'Text + Audio' },
 ]
-const TARGET_OPTIONS = [
-  { value: 'warli', label: 'Warli' },
-  { value: 'santali', label: 'Santali' },
-]
 
 // Guided examples that are KNOWN to translate cleanly (verified against the
-// engine). Judges and kids tap these instead of free-typing into the unknown.
-const EXAMPLES = {
-  warli: ['I drink water', 'My name is Ram', 'Where is your house', 'How are you'],
-  santali: ['hello', 'water', 'thank you'],
-}
+// engine). Tap these instead of free-typing into the unknown.
+const EXAMPLES = ['I drink water', 'My name is Ram', 'Where is your house', 'How are you']
 
 // Accessible segmented toggle (used for From-language and Output-mode).
 // `options` = [{ value, label }]. Uses aria-pressed on each button so screen
@@ -60,7 +52,6 @@ function SendIcon() {
 export default function TranslatePage() {
   const [sourceLang, setSourceLang] = useState('auto')
   const [outputMode, setOutputMode] = useState('text')
-  const [targetLang, setTargetLang] = useState('warli')
   const [textInput, setTextInput] = useState('')
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -85,12 +76,7 @@ export default function TranslatePage() {
     if (!text) { setError('Type or record something to translate.'); return }
     setBusy(true); setError(null); setResult(null)
     try {
-      const res = await translateText({
-        text,
-        sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
-        outputMode,
-        targetLang,
-      })
+      const res = await translateText({ text, sourceLang, outputMode })
       setResult(res)
     } catch (e) {
       setError(e.message || 'Translation failed.')
@@ -102,28 +88,12 @@ export default function TranslatePage() {
   async function onCapture(blob, filename) {
     setBusy(true); setError(null); setResult(null)
     try {
-      const res = await translateSpeech({
-        audioBlob: blob, filename,
-        sourceLang: targetLang === 'santali' ? 'en' : sourceLang,
-        outputMode,
-        targetLang,
-      })
+      const res = await translateSpeech({ audioBlob: blob, filename, sourceLang, outputMode })
       setResult(res)
     } catch (e) {
       setError(e.message || 'Speech translation failed.')
     } finally {
       setBusy(false)
-    }
-  }
-
-  // Switching target: Santali pack (v0) understands English input, so lock
-  // From=English while it is selected. Voice works via transliteration.
-  function handleTargetChange(v) {
-    setTargetLang(v)
-    setResult(null)
-    setError(null)
-    if (v === 'santali') {
-      setSourceLang('en')
     }
   }
 
@@ -139,17 +109,12 @@ export default function TranslatePage() {
     <>
       <WarliBackdrop />
 
-      {/* Shared nav: Learn / Words / Translate / Teacher + language switcher */}
-      <div style={{ position: 'relative', zIndex: 2 }}>
-        <Navbar />
-      </div>
-
       <div className="app">
         <WarliBorder />
 
         <header className="app-header">
-          <h1>Linguify <span className="brand-dot">Translator</span></h1>
-          <p>Type or speak in English / Hindi / Marathi — see and hear it in Warli (Devanagari) or Santali (Ol Chiki).</p>
+          <h1>Warli <span className="brand-dot">Translator</span></h1>
+          <p>Type or speak in English / Hindi / Marathi — see and hear it in Warli (Devanagari, Palghar dialect).</p>
         </header>
 
         {/* Slim backend status line */}
@@ -187,20 +152,7 @@ export default function TranslatePage() {
                 onChange={setOutputMode} labelledBy="mode-caption"
               />
             </div>
-            <div className="bar-group">
-              <span className="bar-caption" id="target-caption">To</span>
-              <SegmentedToggle
-                name="target" value={targetLang} options={TARGET_OPTIONS}
-                onChange={handleTargetChange} labelledBy="target-caption"
-              />
-            </div>
           </div>
-          {targetLang === 'santali' && (
-            <p className="target-note">
-              Santali pack (Jharkhand) understands English for now · From is locked to English.
-              Voice reads a Devanagari transliteration — an approximation.
-            </p>
-          )}
 
           <label className="sr-only" htmlFor="text-input">Text to translate</label>
           <textarea
@@ -233,7 +185,7 @@ export default function TranslatePage() {
           {/* Guided examples — verified to translate cleanly. Tap to try. */}
           <div className="example-chips" role="group" aria-label="Try an example">
             <span className="example-caption">Try:</span>
-            {(EXAMPLES[targetLang] || EXAMPLES.warli).map(ex => (
+            {EXAMPLES.map(ex => (
               <button
                 key={ex}
                 type="button"

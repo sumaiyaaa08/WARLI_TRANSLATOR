@@ -1,4 +1,4 @@
-"""FastAPI application entrypoint for Linguify (Warli + Santali translator & course).
+"""FastAPI application entrypoint for the Warli Speech Translator.
 
 Single-server design: this one process serves BOTH the JSON API (under
 `settings.api_prefix`, default `/api`) and the built React app (from
@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
@@ -55,10 +56,6 @@ app.add_middleware(
 register_error_handlers(app)
 # All JSON endpoints live under /api (e.g. /api/translate/text, /api/health).
 app.include_router(router, prefix=settings.api_prefix, tags=["warli"])
-from .api.learning_routes import learning_router
-app.include_router(learning_router, prefix=settings.api_prefix, tags=["learning"])
-from .api.auth_routes import auth_router
-app.include_router(auth_router, prefix=settings.api_prefix, tags=["auth"])
 
 
 @asynccontextmanager
@@ -84,6 +81,29 @@ app.router.lifespan_context = lifespan
 # fall back to a small JSON landing page and the Vite dev server is used instead.
 _dist = settings.frontend_dist
 if _dist.is_dir() and (_dist / "index.html").exists():
+    _index_file = _dist / "index.html"
+    _dist_resolved = _dist.resolve()
+    _api_root = settings.api_prefix.strip("/")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str):
+        """Boot the SPA for client-side routes (/translate, /words, ...).
+
+        The app uses browser routing, so a direct visit or refresh on any page
+        must return index.html instead of a 404. Unknown /api/* paths keep
+        their JSON 404 so API clients never receive HTML by mistake.
+        """
+        if full_path == _api_root or full_path.startswith(_api_root + "/"):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+        if full_path:
+            candidate = _dist / full_path
+            try:
+                if candidate.resolve().is_relative_to(_dist_resolved) and candidate.is_file():
+                    return FileResponse(candidate)
+            except (ValueError, OSError, RuntimeError):
+                pass
+        return FileResponse(_index_file)
+
     app.mount("/", StaticFiles(directory=str(_dist), html=True), name="frontend")
     logger.info("Serving frontend SPA from %s", _dist)
 else:

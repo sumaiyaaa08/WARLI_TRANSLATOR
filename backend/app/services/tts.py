@@ -70,8 +70,6 @@ class GttsWarli:
             ) from exc
 
         # 1) Optional pronunciation adjustment (decoupled; no-op if inactive).
-        # Skipped for transliterated Santali: the Warli respelling lexicon must
-        # never rewrite another language's words.
         if apply_pronunciation:
             layer = get_pronunciation_layer()
             text_for_tts, changed, applied = layer.adjust(warli_text)

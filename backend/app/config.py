@@ -131,28 +131,6 @@ class Settings:
         return self.data_dir / "pronunciation_audio" / "lexicon.json"
 
     @property
-    def pedagogy_dir(self) -> Path:
-        """Root directory for all curriculum and lesson JSON files."""
-        return self.data_dir / "pedagogy"
-
-    @property
-    def santali_dictionary_path(self) -> Path:
-        """Santali target-language pack (Jharkhand)."""
-        return self.data_dir / "santali_dictionary" / "santali_dictionary.json"
-
-    @property
-    def santali_grammar_path(self) -> Path:
-        """Grammar stub for the Santali target pack."""
-        return self.data_dir / "santali_dictionary" / "santali_grammar.json"
-
-    @property
-    def users_path(self) -> Path:
-        """Accounts + progress store (gitignored). Override with WARLI_USERS_FILE."""
-        return Path(
-            os.getenv("WARLI_USERS_FILE", str(self.data_dir / "users.json"))
-        )
-
-    @property
     def frontend_dist(self) -> Path:
         """Built React app (frontend/dist). Served at "/" when present so the API
         and UI run on one origin. Override with WARLI_FRONTEND_DIST."""
