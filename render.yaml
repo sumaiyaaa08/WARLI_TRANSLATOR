@@ -40,6 +40,13 @@ services:
       - key: WARLI_TRANSLATION_ENGINE
         value: rule
 
+      # Fuzzy neural lookup is OFF on the 512 MB free tier: the embedding
+      # model needs ~1 GB RAM and gets the container OOM-killed at boot
+      # (HTTP 502). The stdlib spelling fallback still runs, so translation
+      # quality is unaffected. Re-enable on a bigger instance.
+      - key: WARLI_FUZZY_ENABLED
+        value: "false"
+
       # TTS — APPROXIMATION (voice reading Warli Devanagari). gTTS needs outbound
       # internet; Render provides it. Warli is a Marathi-family language, so the
       # Marathi voice ('mr') pronounces it better than Hindi ('hi').
