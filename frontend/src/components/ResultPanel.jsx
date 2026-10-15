@@ -100,7 +100,7 @@ export default function ResultPanel({ result, audioBase64, audioMime, outputMode
         {hasAudio ? (
           <AudioPlayer audioBase64={audioBase64} mime={audioMime || 'audio/mpeg'} />
         ) : outputMode === 'text' ? (
-          <span className="audio-hint">Switch to “Text + Speech” to hear it</span>
+          <span className="audio-hint">Switch to “Text + Audio” to hear it</span>
         ) : null}
       </div>
 

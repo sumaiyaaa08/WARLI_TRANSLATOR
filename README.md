@@ -288,7 +288,8 @@ to any container host — `render.yaml` wires it up for Render.
 - **One origin** — no browser→Vercel→Render round-trip and no CORS preflight on every call.
 - **Model pre-baked** — the Whisper `tiny` model is downloaded into the image at build time
   (see `Dockerfile`), so a cold start no longer re-fetches it. This was the biggest latency source.
-- Free tier still spins down when idle, so the first request after spin-down pays the container
+- Free tier still spins do
+wn when idle, so the first request after spin-down pays the container
   boot cost. To remove cold starts entirely, upgrade the instance or add a persistent disk /
   keep-warm ping.
 
