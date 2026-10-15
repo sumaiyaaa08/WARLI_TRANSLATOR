@@ -27,6 +27,15 @@ os.environ.setdefault("WARLI_ASR_MODEL", "tiny")
 os.environ.setdefault("WARLI_ASR_ENABLED", "true")
 os.environ.setdefault("WARLI_TTS_ENABLED", "true")
 
+# Windows consoles default to cp1252, which cannot print Devanagari test
+# output (every Warli assertion detail would crash the whole suite). Force
+# UTF-8 output so the suite runs on any console.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:  # pragma: no cover - very old interpreters
+    pass
+
 RESULTS: list[tuple[str, bool, str]] = []
 
 
